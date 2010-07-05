@@ -10,11 +10,17 @@
 # WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
 
-convexHullr_OVL:	updatehull.cc cqueue.h toplevel_tree.h
-	g++ -o convexHullr_OVL updatehull.cc
+convexHullr_OVL:	updatehull.cc cqueue.o toplevel_tree.o
+	g++ -o convexHullr_OVL updatehull.cc cqueue.o toplevel_tree.o
+
+cqueue.o: cqueue.h cqueue.cc
+	g++ -c cqueue.cc -o cqueue.o
+
+toplevel_tree.o: toplevel_tree.h toplevel_tree.cc
+	g++ -c toplevel_tree.cc -o toplevel_tree.o
 
 all:
 	${MAKE} convexHullr_OVL
 
 clean:
-	rm -f convexHullr_OVL
+	rm -f convexHullr_OVL cqueue.o toplevel_tree.o
