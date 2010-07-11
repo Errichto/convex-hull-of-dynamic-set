@@ -10,17 +10,32 @@
 # WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
 
-convexHullr_OVL:	updatehull.cc cqueue.o toplevel_tree.o
-	g++ -o convexHullr_OVL updatehull.cc cqueue.o toplevel_tree.o
+CXX=g++
+CXX_FLAGS=-Wall
 
-cqueue.o: cqueue.h cqueue.cc
-	g++ -c cqueue.cc -o cqueue.o
+SOURCES= cqueue.h \
+	toplevel_tree.h \
+	cqueue.cc \
+	toplevel_tree.cc
 
-toplevel_tree.o: toplevel_tree.h toplevel_tree.cc
-	g++ -c toplevel_tree.cc -o toplevel_tree.o
+OBJS=$(SOURCES:%.cc=%.o)
+
+convexHull_OVL_SOURCES=updatehull.cc
+convexHull_OVL_OBJS=$(convexHull_OVL_SOURCES:%.cc=%.o)
+
+
+convexHull_OVL:	$(convexHull_OVL_OBJS) libconvexHull.a
+	g++ -o convexHull_OVL $(convexHull_OVL_OBJS) libconvexHull.a
+
+libconvexHull.a:	$(OBJS)
+	ar rc libconvexHull.a $(OBJS)
+	ranlib libconvexHull.a
 
 all:
-	${MAKE} convexHullr_OVL
+	${MAKE} convexHull_OVL
+
+.cc.o:
+	$(CXX) $(CXX_FLAGS) -c $< -o $@
 
 clean:
-	rm -f convexHullr_OVL cqueue.o toplevel_tree.o
+	rm -f convexHull_OVL *.o libconvexHull.a
