@@ -32,7 +32,6 @@ int main(int argc, char *argv[])
 {
 	int i=1;
 	char toptree, lc_rchulls;
-	char test [256];
 	double time_dif;
 	point p;
 	Tree tree1;
@@ -53,28 +52,28 @@ int main(int argc, char *argv[])
 			std::cout.flush();
 			++i;
 			//tree1.print();
-			cout << "\n";
+			std::cout << "\n";
 		}
-		cout << "\n";
-		cout << "See the structure of the top-level storing the current set y/n: ";
-		cin >> toptree;
+		std::cout << "\n";
+		std::cout << "See the structure of the top-level storing the current set y/n: ";
+		std::cin >> toptree;
 		if ( (toptree == 'y') || (toptree == 'Y') )
 		{
 			tree1.print();
-			cout << "\n";
+			std::cout << "\n";
 		}
 		inFile.close();
 		inFile1.close();
 	}
 
-	if ( tree1.root == NULL )
+	tree_node *root = tree1.root();
+	if ( root == NULL )
 		std::cout << "The current set is empty.\n ";
 	else
 	{
-		std::cout << "The convex hull of your initial set is:\n";
-		tree1.root->Ql.print();
+		root->Ql.print();
 		std::cout << "\n";
-		tree1.root->Qr.print();
+		root->Qr.print();
 		std::cout << "\n";
 	}
 	printMenu();
@@ -99,18 +98,19 @@ int main(int argc, char *argv[])
 								std::cout << "\n";
 						}
 						if ( (lc_rchulls == 'y') || (lc_rchulls == 'Y') )
-							tree1.show = 1;
+							tree1.set_show(true);
 						else
-							tree1.show = 0;
+							tree1.set_show(false);
 						start=clock();
 						tree1.add_node(p);
 						end = clock();
 						time_dif = end-start;
 						std::cout << time_dif << " milliseconds spent updating the convex hull\n";
 						std::cout << "The new convex hull is:\n";
-						tree1.root->Ql.print();
+						root = tree1.root();
+						root->Ql.print();
 						std::cout << "\n";
-						tree1.root->Qr.print();
+						root->Qr.print();
 						std::cout << "\n";
 						if ( (toptree == 'y') || (toptree == 'Y') )
 						{
@@ -135,18 +135,19 @@ int main(int argc, char *argv[])
 							std::cout << "\n";
 						}
 						if ( (lc_rchulls == 'y') || (lc_rchulls == 'Y') )
-							tree1.show = 1;
+							tree1.set_show(true);
 						else
-							tree1.show = 0;
+							tree1.set_show(false);
 						start=clock();
 						tree1.delete_node(p);
 						end=clock();
 						time_dif = end-start;
 						std::cout << time_dif << " milliseconds spent updating the convex hull\n";
 						std::cout << "The new convex hull is:\n";
-						tree1.root->Ql.print();
+						root = tree1.root();
+						root->Ql.print();
 						std::cout << "\n";
-						tree1.root->Qr.print();
+						root->Qr.print();
 						std::cout << "\n";
 						if ( (toptree == 'y') || (toptree == 'Y') )
 						{

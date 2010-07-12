@@ -38,14 +38,18 @@ struct tree_node
 class Tree
 {
 public:
-	tree_node *root;
 	Tree();
-	void add_node(point);
-	void delete_node(point);
-	tree_node *search_node(point);
+	void add_node(const point &newPoint);
+	void delete_node(const point &pointToDelete);
+	tree_node* search_node(const point &pointToSearch);
 	void print();
-	int show;
+	tree_node* root() const;
+	void set_show(const bool &show);
+
 private:
+	tree_node *root_;
+	bool show_;
+
 	tree_node *create_label(double, tree_node*, tree_node*);
 	tree_node *create_object(point);
 	void clockwise_anticlockDoubleRotation(tree_node*);

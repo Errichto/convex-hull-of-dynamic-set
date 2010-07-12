@@ -13,21 +13,19 @@
 
 #include "cqueue.h"
 
-ConcatenableQueue::ConcatenableQueue()
+ConcatenableQueue::ConcatenableQueue() : root_(NULL)
 {
-	root = NULL;
 }
 
-ConcatenableQueue::ConcatenableQueue(double x_coord, double y_coord)
+ConcatenableQueue::ConcatenableQueue(const double &x_coord, const double &y_coord) : root_(NULL)
 {
-	root = NULL;
-	add_node(x_coord, y_coord);
+	addNode(x_coord, y_coord);
 }
 
-node *ConcatenableQueue::rightmostNodeAtLevel(int level, node *bigger_y)
+node *ConcatenableQueue::rightmostNodeAtLevel(const int &level, node *bigger_y)
 {
 	node *currentNode;
-	currentNode = root;
+	currentNode = root_;
 	currentNode->biggest_y =  bigger_y;
 	for (int i=1; i<level; ++i)
 	{
@@ -37,10 +35,10 @@ node *ConcatenableQueue::rightmostNodeAtLevel(int level, node *bigger_y)
 	return currentNode;
 }
 
-node *ConcatenableQueue::leftmostNodeAtLevel(int level, node *smaller_y)
+node *ConcatenableQueue::leftmostNodeAtLevel(const int &level, node *smaller_y)
 {
 	node *currentNode;
-	currentNode = root;
+	currentNode = root_;
 	currentNode->smallest_y = smaller_y;
 	for (int i=1; i<level; i++)
 	{
@@ -50,11 +48,11 @@ node *ConcatenableQueue::leftmostNodeAtLevel(int level, node *smaller_y)
 	return currentNode;
 }
 
-int ConcatenableQueue::height()
+int ConcatenableQueue::height() const
 {
 	int h = 0;
 	node *currentNode;
-	currentNode = root;
+	currentNode = root_;
 	while ( currentNode != NULL )
 	{
 		++h;
@@ -63,84 +61,94 @@ int ConcatenableQueue::height()
 	return h;
 }
 
-void ConcatenableQueue::updateValuesDelete(node *updateNode, double val, double newVal)
+void ConcatenableQueue::updateValuesDelete(node *current_node, const double &current_value, const double &new_value)
 {
-	while ( (updateNode != root) && (updateNode != NULL) )
+	while ( (current_node != root_) && (current_node != NULL) )
 	{
-		if ( (updateNode == updateNode->parent->left) && (updateNode->parent->data1 == val) )
-			updateNode->parent->data1 = newVal;
-		else if ( (updateNode == updateNode->parent->middle) && (updateNode->parent->data2 == val) )
-			updateNode->parent->data2 = newVal;
-		else if ( (updateNode == updateNode->parent->right) && (updateNode->parent->middle == NULL) && (updateNode->parent->data2 == val) )
-			updateNode->parent->data2 = newVal;
-		updateNode = updateNode->parent;
+		if ( (current_node == current_node->parent->left) && (current_node->parent->data1 == current_value) )
+		{
+			current_node->parent->data1 = new_value;
+		}
+		else if ( (current_node == current_node->parent->middle) && (current_node->parent->data2 == current_value) )
+		{
+			current_node->parent->data2 = new_value;
+		}
+		else if ( (current_node == current_node->parent->right) &&
+							(current_node->parent->middle == NULL) &&
+							(current_node->parent->data2 == current_value) )
+		{
+			current_node->parent->data2 = new_value;
+		}
+		current_node = current_node->parent;
 	}
 }
 
-void ConcatenableQueue::updateValuesInsert(node *updateNode, double val)
+void ConcatenableQueue::updateValuesInsert(node *current_node, double value)
 {
-	while ( updateNode != root )
+	while ( current_node != root_ )
 	{
-		if ( (updateNode == updateNode->parent->left) && (updateNode->parent->data1 < val) )
-			updateNode->parent->data1 = val;
-		else if ( (updateNode == updateNode->parent->middle) && (updateNode->parent->data2 < val) )
-			updateNode->parent->data2 = val;
-		else if ( (updateNode == updateNode->parent->right) && (updateNode->parent->middle == NULL) && (updateNode->parent->data2 < val) )
-			updateNode->parent->data2 = val;
-		updateNode = updateNode->parent;
-		val = updateNode->data2;
+		if ( (current_node == current_node->parent->left) && (current_node->parent->data1 < value) )
+			current_node->parent->data1 = value;
+		else if ( (current_node == current_node->parent->middle) && (current_node->parent->data2 < value) )
+			current_node->parent->data2 = value;
+		else if ( (current_node == current_node->parent->right) && 
+							(current_node->parent->middle == NULL) && 
+							(current_node->parent->data2 < value) )
+			current_node->parent->data2 = value;
+		current_node = current_node->parent;
+		value = current_node->data2;
 	}
 }
 
-void ConcatenableQueue::deleteNode(node *nodeToDelete)
+void ConcatenableQueue::deleteNode(node *node_to_delete)
 {
 	node *father, *brother, *fathersBrother;
 	double auxValue1, auxValue2;
 	bool leftbrother;
-	if ( nodeToDelete == root )
-		root = NULL;
-	else if ( (nodeToDelete->parent == root) && (root->type == 1) )
+	if ( node_to_delete == root_ )
+		root_ = NULL;
+	else if ( (node_to_delete->parent == root_) && (root_->type == TWO_NODE) )
 	{
-		if ( nodeToDelete == root->left )
+		if ( node_to_delete == root_->left )
 		{
-			root->right->parent = NULL;
-			root = root->right;
+			root_->right->parent = NULL;
+			root_ = root_->right;
 		}
 		else
 		{
-			root->left->parent = NULL;
-			root = root->left;
+			root_->left->parent = NULL;
+			root_ = root_->left;
 		}
 	}
 	else
 	{
 		father = new node;
-		father = nodeToDelete->parent;
-		if ( father->type == 2 )
+		father = node_to_delete->parent;
+		if ( father->type == THREE_NODE )
 		{
-			if ( father->left == nodeToDelete )
+			if ( father->left == node_to_delete )
 			{
 				father->left = father->middle;
 			}
-			else if ( father->right == nodeToDelete )
+			else if ( father->right == node_to_delete )
 				father->right = father->middle;
 			father->middle = NULL;
-			father->type = 1;
+			father->type = TWO_NODE;
 			father->data1 = father->left->data2;
 			father->data2 = father->right->data2;
-			updateValuesDelete(father, nodeToDelete->data2, father->data2);
+			updateValuesDelete(father, node_to_delete->data2, father->data2);
 		}
 		else
 		{
 			brother = new node;
 			fathersBrother = new node;
-			if ( father->left == nodeToDelete )
+			if ( father->left == node_to_delete )
 				brother = father->right;
 			else
 				brother = father->left;
 			if ( father->parent->right == father )
 			{
-				if ( father->parent->type == 2 )
+				if ( father->parent->type == THREE_NODE )
 					fathersBrother = father->parent->middle;
 				else
 					fathersBrother = father->parent->left;
@@ -149,7 +157,7 @@ void ConcatenableQueue::deleteNode(node *nodeToDelete)
 			else
 				if ( father->parent->left == father )
 				{
-					if ( father->parent->type == 2 )
+					if ( father->parent->type == THREE_NODE )
 						fathersBrother = father->parent->middle;
 					else
 						fathersBrother = father->parent->right;
@@ -160,7 +168,7 @@ void ConcatenableQueue::deleteNode(node *nodeToDelete)
 					fathersBrother = father->parent->left;
 					leftbrother = true;
 				}
-			if ( fathersBrother->type == 2 )
+			if ( fathersBrother->type == THREE_NODE )
 			{
 				auxValue1 = father->data2;
 				if (leftbrother)
@@ -175,7 +183,7 @@ void ConcatenableQueue::deleteNode(node *nodeToDelete)
 					father->data1 = father->left->data2;
 					father->data2 = father->right->data2;
 					fathersBrother->middle = NULL;
-					fathersBrother->type = 1;
+					fathersBrother->type = TWO_NODE;
 					updateValuesDelete(father, auxValue1, father->right->data2);
 					updateValuesDelete(fathersBrother, auxValue2, fathersBrother->right->data2);
 				}
@@ -190,7 +198,7 @@ void ConcatenableQueue::deleteNode(node *nodeToDelete)
 					fathersBrother->middle = NULL;
 					father->data1 = father->left->data2;
 					father->data2 = father->right->data2;
-					fathersBrother->type = 1;
+					fathersBrother->type = TWO_NODE;
 					updateValuesDelete(father, auxValue1, father->right->data2);
 				}
 			}
@@ -212,7 +220,7 @@ void ConcatenableQueue::deleteNode(node *nodeToDelete)
 				brother->parent = fathersBrother;
 				fathersBrother->data1 = fathersBrother->left->data2;
 				fathersBrother->data2 = fathersBrother->middle->data2;
-				fathersBrother->type = 2;
+				fathersBrother->type = THREE_NODE;
 				father->right = NULL;
 				father->left = NULL;
 				deleteNode(father);
@@ -222,305 +230,320 @@ void ConcatenableQueue::deleteNode(node *nodeToDelete)
 	}
 }
 
-void ConcatenableQueue::delete_node(double val)
+void ConcatenableQueue::deleteNode(const double &value)
 {
-	node *nodeToDelete;
-	nodeToDelete = new node;
-	nodeToDelete = searchLeafNode(val, root);
-	if ( nodeToDelete == NULL )
-		cout << "The leaf with data " << val << " does not exist in the tree.\n";
+	node *node_to_delete = searchLeafNode(value, root_);
+	if ( node_to_delete == NULL )
+	{
+		std::cout << "The leaf with data " << value << " does not exist in the tree.\n";
+	}
 	else
 	{
-		deleteNode(nodeToDelete);
-		cout << "The leaf with data " << val << " was deleted from the tree.\n";
+		deleteNode(node_to_delete);
+		std::cout << "The leaf with data " << value << " was deleted from the tree.\n";
 	}
-	delete nodeToDelete;
+	delete node_to_delete;
 }
 
-bool ConcatenableQueue::is_empty() 
+bool ConcatenableQueue::isEmpty() const
 {
-	if ( root == NULL )
+	if ( root_ == NULL )
 		return true;
 	else
 		return false;
 }
 
-node *ConcatenableQueue::searchLeafNode(double val, node *current)
+node *ConcatenableQueue::searchLeafNode(const double &value, node *current)
 {
-	if ( current->type == 0 )
-		if ( current->data2 == val)
+	if ( current->type == LEAF_NODE )
+	{
+		if ( current->data2 == value)
 			return current;
 		else
 			return NULL;
-	else if ( val <= current->data1 )
-		return searchLeafNode(val, current->left);
-	else if ( (val <= current->data2) && (current->middle != NULL) )
-		return searchLeafNode(val, current->middle);
-	else
-		return searchLeafNode(val, current->right);
+	}
+	else if ( value <= current->data1 )
+	{
+		return searchLeafNode(value, current->left);
+	}
+	else if ( (value <= current->data2) && (current->middle != NULL) )
+	{
+		return searchLeafNode(value, current->middle);
+	}
+	return searchLeafNode(value, current->right);
 }
 
-void ConcatenableQueue::addChild(node *v, node *aux, double val)
+void ConcatenableQueue::addChildNode(node *child, node *aux, const double &value)
 {
 	node *v1, *aux1;
-	double d1, d2;
 	v1 = new node;
-	if ( v->left->type == 0 )
+	if ( child->left->type == LEAF_NODE )
 	{
-		v1 = create_2Node(aux->data2, v->right->data2, aux, v->right);
-		v->biggest_y = v->middle;
+		v1 = create2Node(aux->data2, child->right->data2, aux, child->right);
+		child->biggest_y = child->middle;
 	}
 	else
 	{
 		//d1 = rightmostValue(aux);
 		//d2 = rightmostValue(v->right);
-		//v1 = create_2Node(d1, d2, aux, v->right);
-		v1 = create_2Node(aux->biggest_y->data2, v->right->biggest_y->data2, aux, v->right);
-		v->biggest_y = v->middle->biggest_y;
+		//v1 = create2Node(d1, d2, aux, v->right);
+		v1 = create2Node(aux->biggest_y->data2, child->right->biggest_y->data2, aux, child->right);
+		child->biggest_y = child->middle->biggest_y;
 	}
 	v1->left->parent = v1;
 	v1->right->parent = v1;
-	v->right = v->middle;
-	v->middle = NULL;
-	v->type = 1;
-	if ( v->parent == NULL )
+	child->right = child->middle;
+	child->middle = NULL;
+	child->type = TWO_NODE;
+	if ( child->parent == NULL )
 	{
-		node *newRoot;
-		newRoot = new node;
-		newRoot = create_2Node(root->data2, v1->data2, v, v1);
-		root = newRoot;
-		v->parent = root;
-		v1->parent = root;
+		node *newRoot = create2Node(root_->data2, v1->data2, child, v1);
+		root_ = newRoot;
+		child->parent = root_;
+		v1->parent = root_;
 	}
 	else
 	{
-		v1->parent = v->parent;
-		if ( v->parent->type == 1 )
+		v1->parent = child->parent;
+		if ( child->parent->type == TWO_NODE )
 		{
-			if (v == v->parent->left)
+			if (child == child->parent->left)
 			{
-				v->parent->middle = v1;
-				v->parent->data2 = v1->data2;
-				v->parent->data1 = v->data2;
+				child->parent->middle = v1;
+				child->parent->data2 = v1->data2;
+				child->parent->data1 = child->data2;
 			}
 			else
 			{
-				v->parent->middle = v;
-				v->parent->right = v1;
-				v->parent->data2 = v->data2;
+				child->parent->middle = child;
+				child->parent->right = v1;
+				child->parent->data2 = child->data2;
 			}
-			v->parent->type = 2;
+			child->parent->type = THREE_NODE;
 		}
 		else
 		{
-			if ( v == v->parent->left)
+			if ( child == child->parent->left)
 			{
-				aux1 = v->parent->middle;
-				v->parent->middle = v1;
+				aux1 = child->parent->middle;
+				child->parent->middle = v1;
 			}
 			else
-				if ( v == v->parent->middle )
+			{
+				if ( child == child->parent->middle )
+				{
 					aux1 = v1;
+				}
 				else
 				{
-					aux1 = v;
-					v->parent->right = v1;
+					aux1 = child;
+					child->parent->right = v1;
 				}
-
-			if ( v->parent->left->type == 0 )
+			}
+			if ( child->parent->left->type == LEAF_NODE )
 			{
-				v->parent->data1 = v->parent->left->data2;
-				v->parent->data2 = v->parent->middle->data2;
+				child->parent->data1 = child->parent->left->data2;
+				child->parent->data2 = child->parent->middle->data2;
 			}
 			else
 			{
-				v->parent->data1 = v->parent->left->biggest_y->data2;
-				v->parent->data2 = v->parent->middle->biggest_y->data2;   
+				child->parent->data1 = child->parent->left->biggest_y->data2;
+				child->parent->data2 = child->parent->middle->biggest_y->data2;   
 			}
 			//v->parent->data1 = rightmostValue(v->parent->left);
 			//v->parent->data2 = rightmostValue(v->parent->middle);
-			addChild(v->parent, aux1, val);
+			addChildNode(child->parent, aux1, value);
 		}
 	}
 }
 
-node *ConcatenableQueue::searchForInsert(node *newNode, node *r)
+node *ConcatenableQueue::searchForInsert(node *new_node, node *current_node)
 {
-	if ( newNode->data2 < r->smallest_y->data2 )
-		r->smallest_y = newNode;
-	else if ( newNode->data2 > r->biggest_y->data2 )
-		r->biggest_y = newNode;
+	if ( new_node->data2 < current_node->smallest_y->data2 )
+		current_node->smallest_y = new_node;
+	else if ( new_node->data2 > current_node->biggest_y->data2 )
+		current_node->biggest_y = new_node;
 
-	if ( r->left->type == 0 )
-		return r;
+	if ( current_node->left->type == LEAF_NODE )
+		return current_node;
 	else
 	{
-		if ( newNode->data2 <= r->data1)
-			return searchForInsert(newNode, r->left);
+		if ( new_node->data2 <= current_node->data1)
+			return searchForInsert(new_node, current_node->left);
 		else
-			if ((r->middle != NULL) && (newNode->data2 <= r->data2))
-				return searchForInsert(newNode, r->middle);
+			if ((current_node->middle != NULL) && (new_node->data2 <= current_node->data2))
+				return searchForInsert(new_node, current_node->middle);
 			else
-				return searchForInsert(newNode, r->right);
+				return searchForInsert(new_node, current_node->right);
 	}
 }
 
-node *ConcatenableQueue::create_LeafNode(double xcoord, double ycoord)
+node *ConcatenableQueue::createLeafNode(const double &x_coord, const double &y_coord)
 {
-	node *newNode;
-	newNode = new node;
-	newNode->data1 = -1;
-	newNode->data2 = ycoord;
-	newNode->x_coord = xcoord;
-	newNode->type = 0;
-	newNode->left = NULL;
-	newNode->middle = NULL;
-	newNode->right = NULL;
-	newNode->parent = NULL;
+	node *newNode = new node;
+	newNode->data1 = -1.0;
+	newNode->data2 = y_coord;
+	newNode->x_coord = x_coord;
 	return newNode;
 }
 
-node *ConcatenableQueue::create_2Node(double lValue, double mValue, node *leftSon, node *rightSon)
+node *ConcatenableQueue::create2Node(const double &l_value, const double &m_value, node *left_child, node *right_child)
 {
-	node *newNode;
-	newNode = new node;
-	newNode->data1 = lValue;
-	newNode->data2 = mValue;
-	newNode->type = 1;
-	newNode->left = leftSon;
-	newNode->middle = NULL;
-	newNode->right = rightSon;
-	newNode->parent = NULL;
-	if ( leftSon->type == 0 )
+	node *newNode = new node;
+	newNode->data1 = l_value;
+	newNode->data2 = m_value;
+	newNode->type = TWO_NODE;
+	newNode->left = left_child;
+	newNode->right = right_child;
+	if ( left_child->type == LEAF_NODE )
 	{
-		newNode->smallest_y = leftSon;
-		newNode->biggest_y = rightSon;
+		newNode->smallest_y = left_child;
+		newNode->biggest_y = right_child;
 	}
 	else
 	{
-		newNode->smallest_y = leftSon->smallest_y;
-		newNode->biggest_y = rightSon->biggest_y;
+		newNode->smallest_y = left_child->smallest_y;
+		newNode->biggest_y = right_child->biggest_y;
 	}
 	return newNode;
 }
 
-void ConcatenableQueue::add_node(double xcoord, double ycoord) 
+void ConcatenableQueue::addNode(const double &x_coord, const double &y_coord) 
 {
 	node *newNode, *aux;
 	newNode = new node;
-	if ( root == NULL)
+	if ( root_ == NULL)
 	{
-		newNode = create_LeafNode(xcoord, ycoord);
-		root = newNode;
+		newNode = createLeafNode(x_coord, y_coord);
+		root_ = newNode;
 	}
 	else
-		if ( root->type == 0 )
+	{
+		if ( root_->type == LEAF_NODE )
 		{
 			node *newNode1;
 			node *newNode2;
 			newNode1 = new node;
 			newNode2 = new node;
-			newNode1 = create_LeafNode(xcoord, ycoord);
-			newNode2 = create_LeafNode(root->x_coord,root->data2);
-			if ( ycoord < root->data2 )
-				newNode = create_2Node(ycoord, root->data2, newNode1, newNode2);
+			newNode1 = createLeafNode(x_coord, y_coord);
+			newNode2 = createLeafNode(root_->x_coord,root_->data2);
+
+			if ( y_coord < root_->data2 )
+				newNode = create2Node(y_coord, root_->data2, newNode1, newNode2);
 			else
-				newNode = create_2Node(root->data2, ycoord, newNode2, newNode1);
-			root = newNode;
-			newNode1->parent = root;
-			newNode2->parent = root;
-	}
-	else
-	{
-		node *father;
-		father = new node;
-		newNode = create_LeafNode(xcoord, ycoord);
-		father = searchForInsert(newNode, root);
-		if ( father->type == 1 )
-		{
-			newNode->parent = father;
-			if ( (father->data1 <= ycoord) && (ycoord <= father->data2) )
-			{
-				father->middle = newNode;
-				father->data2 = ycoord;
-			}
-		else
-			if ( father->data1 > ycoord )
-			{
-				father->middle = father->left;
-				father->left = newNode;
-				father->data1 = ycoord;
-				father->data2 = father->middle->data2;
-			}
-			else
-			{
-				father->middle = father->right;
-				father->right = newNode;
-				father->data2 = father->middle->data2;
-			}
-			father->type = 2;
-			updateValuesInsert(father, father->right->data2);
+				newNode = create2Node(root_->data2, y_coord, newNode2, newNode1);
+
+			root_ = newNode;
+			newNode1->parent = root_;
+			newNode2->parent = root_;
 		}
 		else
 		{
-			newNode->parent = father;
-			if ( newNode->data2 > father->data2 )
-				if ( newNode->data2 > father->right->data2 )
+			node *father;
+			father = new node;
+			newNode = createLeafNode(x_coord, y_coord);
+			father = searchForInsert(newNode, root_);
+			if ( father->type == TWO_NODE )
+			{
+				newNode->parent = father;
+				if ( (father->data1 <= y_coord) && (y_coord <= father->data2) )
 				{
-					aux = father->right;
-					father->right = newNode;
+					father->middle = newNode;
+					father->data2 = y_coord;
 				}
 				else
-					aux = newNode;
+				{
+					if ( father->data1 > y_coord )
+					{
+						father->middle = father->left;
+						father->left = newNode;
+						father->data1 = y_coord;
+						father->data2 = father->middle->data2;
+					}
+					else
+					{
+						father->middle = father->right;
+						father->right = newNode;
+						father->data2 = father->middle->data2;
+					}
+				}
+				father->type = THREE_NODE;
+				updateValuesInsert(father, father->right->data2);
+			}
 			else
 			{
-				aux = father->middle;
-				if ( newNode->data2 > father->data1 )
-					father->middle = newNode;
+				newNode->parent = father;
+				if ( newNode->data2 > father->data2 )
+				{
+					if ( newNode->data2 > father->right->data2 )
+					{
+						aux = father->right;
+						father->right = newNode;
+					}
+					else
+					{
+						aux = newNode;
+					}
+				}
 				else
 				{
-					father->middle = father->left;
-					father->left = newNode;
+					aux = father->middle;
+					if ( newNode->data2 > father->data1 )
+					{
+						father->middle = newNode;
+					}
+					else
+					{
+						father->middle = father->left;
+						father->left = newNode;
+					}
 				}
+				father->data1 = father->left->data2;
+				father->data2 = father->middle->data2;
+				addChildNode(father, aux, y_coord);
 			}
-			father->data1 = father->left->data2;
-			father->data2 = father->middle->data2;
-			addChild(father, aux, ycoord);
 		}
 	}
 }
 
 void ConcatenableQueue::print()
 {
-	if ( is_empty() )
-		cout << "Empty Queue\n";
+	if ( isEmpty() )
+		std::cout << "Empty Queue\n";
 	else
-		printValues(root, 0);
+		printValues(root_, 0);
 }
 
-void ConcatenableQueue::printValues(node *printNode, int indent)
+void ConcatenableQueue::printValues(node *current_node, const int &indent)
 {
-	int i;
-	if ( printNode != NULL )
+	if ( current_node != NULL )
 	{
-		if ( printNode->type == 0)
-			cout << "(" << printNode->x_coord << ", " << printNode->data2 << "), ";
-		printValues(printNode->left, indent+1);	
-		printValues(printNode->middle, indent+1);
-		printValues(printNode->right, indent+1);
+		if ( current_node->type == LEAF_NODE)
+			std::cout << "(" << current_node->x_coord << ", " << current_node->data2 << "), ";
+		printValues(current_node->left, indent + 1);	
+		printValues(current_node->middle, indent + 1);
+		printValues(current_node->right, indent + 1);
 	}
 }
 	
 
-void ConcatenableQueue::search(double val)
+void ConcatenableQueue::search(const double &value)
 {
-	node *res;
-	res = new node;
-	res = searchLeafNode(val, root);
+	node *res = searchLeafNode(value, root_);
 	if (res == NULL)
-		cout << val << " is not a data of the tree\n";
+		std::cout << value << " is not a data of the tree\n";
 	else
-		cout << res->data2 << " was found\n";
+		std::cout << res->data2 << " was found\n";
+}
+
+node *ConcatenableQueue::root()
+{
+	return root_;
+}
+
+void ConcatenableQueue::set_root(node *new_root)
+{
+	root_ = new_root;
 }
 
 //Procedures concatenate and split concatenable queues
@@ -529,9 +552,9 @@ ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2)
 	ConcatenableQueue newCQ;
 	int heightCQ1, heightCQ2, level;
 	node *attachNode, *currentNode, *aux;
-	if ( CQ1.is_empty() )
+	if ( CQ1.isEmpty() )
 		return CQ2;
-	else if ( CQ2.is_empty() )
+	else if ( CQ2.isEmpty() )
 		return CQ1;
 	else
 	{
@@ -541,82 +564,82 @@ ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2)
 		{
 			node *newRoot;
 			newRoot = new node;
-			newRoot->left = CQ1.root;
+			newRoot->left = CQ1.root();
 			newRoot->left->parent = newRoot;
-			newRoot->right = CQ2.root;
+			newRoot->right = CQ2.root();
 			newRoot->right->parent = newRoot;
-			newRoot->type = 1;
-			if ( CQ1.root->type != 0 )
+			newRoot->type = TWO_NODE;
+			if ( CQ1.root()->type != LEAF_NODE )
 			{
-				newRoot->data1 = CQ1.root->biggest_y->data2;
-				newRoot->data2 = CQ2.root->biggest_y->data2;
-				newRoot->smallest_y = CQ1.root->smallest_y;
-				newRoot->biggest_y = CQ2.root->biggest_y;
+				newRoot->data1 = CQ1.root()->biggest_y->data2;
+				newRoot->data2 = CQ2.root()->biggest_y->data2;
+				newRoot->smallest_y = CQ1.root()->smallest_y;
+				newRoot->biggest_y = CQ2.root()->biggest_y;
 			}
 			else
 			{
-				newRoot->smallest_y = CQ1.root;
-				newRoot->biggest_y = CQ2.root;
-				newRoot->data1 = CQ1.root->data2;
-				newRoot->data2 = CQ2.root->data2;
+				newRoot->smallest_y = CQ1.root();
+				newRoot->biggest_y = CQ2.root();
+				newRoot->data1 = CQ1.root()->data2;
+				newRoot->data2 = CQ2.root()->data2;
 			}
-			newCQ.root = newRoot;
-			newCQ.root->middle = NULL;
+			newCQ.set_root(newRoot);
+			newCQ.root()->middle = NULL;
 		}
 		else if ( heightCQ1 > heightCQ2 )
 		{
 			newCQ = CQ1;
-			newCQ.root->parent = NULL;
+			newCQ.root()->parent = NULL;
 			level = heightCQ1-heightCQ2;
-			if ( CQ2.root->type != 0 )
-				attachNode = newCQ.rightmostNodeAtLevel(level, CQ2.root->biggest_y);
+			if ( CQ2.root()->type != LEAF_NODE )
+				attachNode = newCQ.rightmostNodeAtLevel(level, CQ2.root()->biggest_y);
 			else
-				attachNode = newCQ.rightmostNodeAtLevel(level, CQ2.root);
-			if ( attachNode->type == 1 )
+				attachNode = newCQ.rightmostNodeAtLevel(level, CQ2.root());
+			if ( attachNode->type == TWO_NODE )
 			{
-				attachNode->type = 2;
+				attachNode->type = THREE_NODE;
 				attachNode->middle = attachNode->right;
-				attachNode->right = CQ2.root;
+				attachNode->right = CQ2.root();
 				attachNode->right->parent = attachNode;
 				currentNode = attachNode->parent;
 				while ( currentNode != NULL )
 				{
-					if ( currentNode->type == 1 )
+					if ( currentNode->type == TWO_NODE )
 					{
-						if ( CQ2.root->type == 0 )
-							currentNode->data2 = CQ2.root->data2;
+						if ( CQ2.root()->type == LEAF_NODE )
+							currentNode->data2 = CQ2.root()->data2;
 						else
-							currentNode->data2 = CQ2.root->biggest_y->data2;
+							currentNode->data2 = CQ2.root()->biggest_y->data2;
 					}
 					currentNode = currentNode->parent;
 				}
 			}
-			else if ( attachNode->type == 2 )
+			else if ( attachNode->type == THREE_NODE )
 			{
 				aux = attachNode->right;
-				attachNode->right = CQ2.root;
+				attachNode->right = CQ2.root();
 				attachNode->right->parent = attachNode;
-				if ( attachNode == CQ1.root )
+				if ( attachNode == CQ1.root() )
 					attachNode->parent = NULL;
-				newCQ.addChild(attachNode, aux, attachNode->right->data2);
+				newCQ.addChildNode(attachNode, aux, attachNode->right->data2);
 			}
 		}
 		else
 		{
 			newCQ = CQ2;
-			newCQ.root->parent = NULL;
+			newCQ.root()->parent = NULL;
 			level = heightCQ2-heightCQ1;
-			if ( CQ1.root->type != 0 )
-				attachNode = newCQ.leftmostNodeAtLevel(level, CQ1.root->smallest_y);
+			if ( CQ1.root()->type != LEAF_NODE )
+				attachNode = newCQ.leftmostNodeAtLevel(level, CQ1.root()->smallest_y);
 			else
-				attachNode = newCQ.leftmostNodeAtLevel(level, CQ1.root);
-			if ( attachNode->type == 1 )
+				attachNode = newCQ.leftmostNodeAtLevel(level, CQ1.root());
+			if ( attachNode->type == TWO_NODE )
 			{
-				attachNode->type = 2;
+				attachNode->type = THREE_NODE;
 				attachNode->middle = attachNode->left;
-				attachNode->left = CQ1.root;
-				attachNode->left->parent = newCQ.root;
-				if ( CQ1.root->type == 0 )
+				attachNode->left = CQ1.root();
+				attachNode->left->parent = newCQ.root();
+				if ( CQ1.root()->type == LEAF_NODE )
 				{
 					attachNode->data1 = attachNode->left->data2;
 					attachNode->data2 = attachNode->middle->data2;
@@ -627,20 +650,20 @@ ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2)
 					attachNode->data2 = attachNode->middle->biggest_y->data2;
 				}
 			}
-			else if ( attachNode->type == 2 )
+			else if ( attachNode->type == THREE_NODE )
 			{
 				aux = attachNode->middle;
 				attachNode->middle = attachNode->left;
-				attachNode->left = CQ1.root;
+				attachNode->left = CQ1.root();
 				attachNode->left->parent = attachNode;
 				attachNode->data2 = attachNode->data1;
-				if ( CQ1.root->type == 0 )
+				if ( CQ1.root()->type == LEAF_NODE )
 					attachNode->data1 = attachNode->left->data2;
 				else
 					attachNode->data1 = attachNode->left->biggest_y->data2;
-				if ( attachNode == CQ2.root )
+				if ( attachNode == CQ2.root() )
 					attachNode->parent = NULL;
-				newCQ.addChild(attachNode, aux, attachNode->left->data2);
+				newCQ.addChildNode(attachNode, aux, attachNode->left->data2);
 			}
 		}
 		return newCQ;
@@ -648,20 +671,20 @@ ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2)
 }
 
 //split_left, CQ1 keeps the node with value val 
-void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, double val)
+void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value)
 {
 	ConcatenableQueue cqr1, cqr2, cqr, cql1, cql2, cql, aux1, aux2;
 	node *currentNode;
-	currentNode = CQ.root;
-	while ( currentNode->type != 0 )
+	currentNode = CQ.root();
+	while ( currentNode->type != LEAF_NODE )
 	{
-		if ( val <= currentNode->data1 )
+		if ( split_value <= currentNode->data1 )
 		{
-			cqr1.root = currentNode->right;
-			cqr1.root->parent = NULL;
-			if ( currentNode->type == 1 )
+			cqr1.set_root(currentNode->right);
+			cqr1.root()->parent = NULL;
+			if ( currentNode->type == TWO_NODE )
 			{
-				if ( cqr.root == NULL )
+				if ( cqr.root() == NULL )
 					cqr = cqr1;
 				else
 				{
@@ -671,9 +694,9 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 			}
 			else
 			{
-				cqr2.root = currentNode->middle;
-				cqr2.root->parent = NULL;
-				if ( cqr.root == NULL )
+				cqr2.set_root(currentNode->middle);
+				cqr2.root()->parent = NULL;
+				if ( cqr.root() == NULL )
 					cqr = concatenate(cqr2, cqr1);
 				else
 				{
@@ -684,13 +707,13 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 			}
 			currentNode = currentNode->left;
 		}
-		else if( (currentNode->type == 2) && (val <= currentNode->data2) )
+		else if( (currentNode->type == THREE_NODE) && (split_value <= currentNode->data2) )
 		{
-			cql1.root = currentNode->left;
-			cql1.root->parent = NULL;
-			cqr1.root = currentNode->right;
-			cqr1.root->parent = NULL;
-			if ( cqr.root == NULL )
+			cql1.set_root(currentNode->left);
+			cql1.root()->parent = NULL;
+			cqr1.set_root(currentNode->right);
+			cqr1.root()->parent = NULL;
+			if ( cqr.root() == NULL )
 				cqr = cqr1;
 			else
 			{
@@ -698,7 +721,7 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 				cqr = concatenate(cqr1, aux1);
 			}
 			aux1 = cql;
-			if ( cql.root = NULL )
+			if ( cql.root() == NULL )
 				cql = cql1;
 			else
 				cql = concatenate(aux1, cql1);
@@ -706,11 +729,11 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 		}
 		else
 		{
-			cql1.root = currentNode->left;
-			cql1.root->parent = NULL; 
-			if ( currentNode->type == 1 )
+			cql1.set_root(currentNode->left);
+			cql1.root()->parent = NULL; 
+			if ( currentNode->type == TWO_NODE )
 			{
-				if ( cql.root == NULL )
+				if ( cql.root() == NULL )
 					cql = cql1;
 				else
 				{
@@ -720,9 +743,9 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 			}
 			else
 			{
-				cql2.root = currentNode->middle;
-				cql2.root->parent = NULL;
-				if ( cql.root == NULL )
+				cql2.set_root(currentNode->middle);
+				cql2.root()->parent = NULL;
+				if ( cql.root() == NULL )
 					cql = concatenate(cql1, cql2);
 				else
 				{
@@ -734,15 +757,15 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 			currentNode = currentNode->right;
 		}
 	}
-	if ( cql.root == NULL) 
+	if ( cql.root() == NULL) 
 	{
-		cql.root = currentNode;
-		cql.root->parent = NULL;
+		cql.set_root(currentNode);
+		cql.root()->parent = NULL;
 	}
 	else
 	{
-		aux1.root = currentNode;
-		aux1.root->parent = NULL;
+		aux1.set_root(currentNode);
+		aux1.root()->parent = NULL;
 		aux2 = cql;
 		cql = concatenate(aux2, aux1);
 	}
@@ -751,91 +774,97 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 }
 
 //split_right, CQ2 keeps the node with value val 
-void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, double val)
+void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value)
 {
 	ConcatenableQueue cqr1, cqr2, cqr, cql1, cql2, cql, aux1, aux2;
-	node *currentNode = CQ.root;
-	while ( currentNode->type != 0 )
+	node *currentNode = CQ.root();
+	while ( currentNode->type != LEAF_NODE )
 	{
-		if ( val <= currentNode->data1 )
+		if ( split_value <= currentNode->data1 )
 		{
-			cqr1.root = currentNode->right;
-			cqr1.root->parent = NULL;
-			if ( currentNode->type == 1 )
+			cqr1.set_root(currentNode->right);
+			cqr1.root()->parent = NULL;
+			if ( currentNode->type == TWO_NODE )
 			{
-				if ( cqr.root == NULL )
-					cqr.root = 	cqr1.root;
+				if ( cqr.root() == NULL )
+					cqr.set_root(cqr1.root());
 				else
 				{
-					aux1.root = cqr.root;
+					aux1.set_root(cqr.root());
 					cqr = concatenate(cqr1, aux1);
 				}
 			}
 			else
 			{
-				cqr2.root = currentNode->middle;
-				cqr2.root->parent = NULL;
-				if ( cqr.root == NULL )
+				cqr2.set_root(currentNode->middle);
+				cqr2.root()->parent = NULL;
+				if ( cqr.root() == NULL )
 					cqr = concatenate(cqr2, cqr1);
 				else
 				{
 					//aux1 = cqr;
-					aux1.root = cqr.root;
+					aux1.set_root(cqr.root());
 					aux2 = concatenate(cqr2, cqr1);
 					cqr = concatenate(aux2, aux1);
 				}
 			}
 			currentNode = currentNode->left;
 		}
-		else if( (currentNode->type == 2) && (val <= currentNode->data2) )
+		else if( (currentNode->type == THREE_NODE) && (split_value <= currentNode->data2) )
 		{
-			cql1.root = currentNode->left;
-			cql1.root->parent = NULL;
-			cqr1.root = currentNode->right;
-			cqr1.root->parent = NULL;
-			if ( cqr.root == NULL )
+			cql1.set_root(currentNode->left);
+			cql1.root()->parent = NULL;
+			cqr1.set_root(currentNode->right);
+			cqr1.root()->parent = NULL;
+			if ( cqr.root() == NULL )
+			{
 				//cqr = cqr1;
-				cqr.root = cqr1.root;
+				cqr.set_root(cqr1.root());
+			}
 			else
 			{
-				aux1.root = cqr.root;
+				aux1.set_root(cqr.root());
 				//aux1 = cqr;
 				cqr = concatenate(cqr1, aux1);
 			}
 			aux1 = cql;
-			aux1.root = cql.root;
-			if ( cql.root = NULL )
+			aux1.set_root(cql.root());
+			if ( cql.root() == NULL )
 			//cql = cql1;
-				cql.root = cql1.root;
+				cql.set_root(cql1.root());
 			else
 				cql = concatenate(aux1, cql1); 
 			currentNode = currentNode->middle;
 		}
 		else
 		{
-			cql1.root = currentNode->left;
-			cql1.root->parent = NULL;
-			if ( currentNode->type == 1 )
+			cql1.set_root(currentNode->left);
+			cql1.root()->parent = NULL;
+			if ( currentNode->type == TWO_NODE )
 			{
-				if ( cql.root == NULL )
+				if ( cql.root() == NULL )
+				{
 					//cql = cql1;
-					cql.root = cql1.root;
+					cql.set_root(cql1.root());
+				}
 				else
 				{
 					//aux1 = cql;
-					aux1.root = cql.root;
+					aux1.set_root(cql.root());
 					cql = concatenate(aux1, cql1);
 				}
 			}
 			else
 			{
-				cql2.root = currentNode->middle;
-				cql2.root->parent = NULL;
-				if ( cql.root == NULL )
+				cql2.set_root(currentNode->middle);
+				cql2.root()->parent = NULL;
+				if ( cql.root() == NULL )
+				{
 					cql = concatenate(cql1, cql2);
+				}
 				else
 				{
-					aux1.root = cql.root;
+					aux1.set_root(cql.root());
 					//aux1 = cql;
 					aux2 = concatenate(cql1, cql2);
 					cql = concatenate(aux1, aux2);
@@ -844,15 +873,15 @@ void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueu
 			currentNode = currentNode->right;
 		}
 	}
-	if ( cqr.root == NULL) 
+	if ( cqr.root() == NULL) 
 	{
-		cqr.root = currentNode;
-		cqr.root->parent = NULL;
+		cqr.set_root(currentNode);
+		cqr.root()->parent = NULL;
 	}
 	else
 	{
-		aux1.root = currentNode;
-		aux1.root->parent = NULL;
+		aux1.set_root(currentNode);
+		aux1.root()->parent = NULL;
 		aux2 = cqr;
 		cqr = concatenate(aux1, aux2);
 	}
