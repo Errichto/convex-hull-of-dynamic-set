@@ -15,7 +15,7 @@
 #include "toplevel_tree.h"
 
 
-Tree::Tree() : root(NULL), show(0)
+Tree::Tree() : root_(NULL), show_(false)
 {
 }
 
@@ -702,7 +702,7 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 {
 	bool bridgefound, onepoint_lh, onepoint_uh, out;
 	double half;
-	int chk_case, flag_lh, flag_uh, i=1;
+	int chk_case, flag_lh, flag_uh;
 	point p, p0, p1, q, q0, q1;
 	node *current_lh, *current_uh, *aux;
 	bridgefound = false;
@@ -710,13 +710,13 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 	onepoint_uh = true;
 	if ( hull == 0 )
 	{
-		current_lh = v->leftchild->Ql.root;
-		current_uh = v->rightchild->Ql.root;
+		current_lh = v->leftchild->Ql.root();
+		current_uh = v->rightchild->Ql.root();
 	}
 	else
 	{
-		current_lh = v->leftchild->Qr.root;
-		current_uh = v->rightchild->Qr.root;
+		current_lh = v->leftchild->Qr.root();
+		current_uh = v->rightchild->Qr.root();
 	}
 	if ( (current_lh->type != 0) && (current_uh->type != 0) )
 		half = current_uh->smallest_y->data2 - ((current_uh->smallest_y->data2 - current_lh->biggest_y->data2)/2);
@@ -920,10 +920,10 @@ tree_node *Tree::create_label(double newLabel, tree_node *leftchild, tree_node *
 	newNode->bridge2_lc = rightchild->p;
 	newNode->bridge1_rc = leftchild->p;
 	newNode->bridge2_rc = rightchild->p;
-	leftchild->Ql.root = NULL;
-	rightchild->Ql.root = NULL;
-	leftchild->Qr.root = NULL;
-	rightchild->Qr.root = NULL;
+	leftchild->Ql.set_root(NULL);
+	rightchild->Ql.set_root(NULL);
+	leftchild->Qr.set_root(NULL);
+	rightchild->Qr.set_root(NULL);
 	newNode->leftchild = NULL;
 	newNode->rightchild = NULL;
 	newNode->parent = NULL;
@@ -955,10 +955,10 @@ void Tree::anticlockwiseRotation(tree_node *zNode)
 	zNode->rightchild = yNode->leftchild;
 	yNode->leftchild->parent = zNode;
 	yNode->leftchild = zNode;
-	if ( zNode == root )
+	if ( zNode == root_ )
 	{
 		yNode->parent = NULL;
-		root = yNode;
+		root_ = yNode;
 	}
 	else if ( zNode == zNode->parent->leftchild )
 	{
@@ -990,10 +990,10 @@ void Tree::clockwiseRotation(tree_node *zNode)
 	zNode->leftchild = yNode->rightchild;
 	yNode->rightchild->parent = zNode;
 	yNode->rightchild = zNode;
-	if ( zNode == root )
+	if ( zNode == root_ )
 	{
 		yNode->parent = NULL;
-		root = yNode;
+		root_ = yNode;
 	}
 	else if ( zNode == zNode->parent->leftchild )
 	{
@@ -1031,8 +1031,8 @@ void Tree::clockwise_anticlockDoubleRotation(tree_node *zNode)
 	yNode->parent = xNode;
 	xNode->parent = zNode->parent;
 	xNode->leftchild = zNode;
-	if ( zNode == root )
-		root = xNode;
+	if ( zNode == root_ )
+		root_ = xNode;
 	else if ( zNode->parent->leftchild == zNode )
 		zNode->parent->leftchild = xNode;
 	else
@@ -1069,8 +1069,8 @@ void Tree::anticlockwise_clockDoubleRotation(tree_node *zNode)
 	yNode->parent = xNode;
 	xNode->parent = zNode->parent;
 	xNode->rightchild = zNode;
-	if ( zNode == root )
-		root = xNode;
+	if ( zNode == root_ )
+		root_ = xNode;
 	else if ( zNode->parent->leftchild == zNode )
 		zNode->parent->leftchild = xNode;
 	else
@@ -1094,22 +1094,22 @@ void Tree::anticlockwise_clockDoubleRotation(tree_node *zNode)
 	xNode->balance_factor = 0;
 }
 
-void Tree::add_node(point newPoint) 
+void Tree::add_node(const point &newPoint) 
 {
 	tree_node *newNode, *parent, *current, *newLabel;
 	bool right;
 	int i;
 	newNode = create_object(newPoint);
-	if ( root == NULL )
-		root = newNode;
+	if ( root_ == NULL )
+		root_ = newNode;
 	else
 	{
-		current = root;
+		current = root_;
 		i = 1;
 		while ( current->leftchild !=NULL )
 		{
 			buildChildrensHulls(current);
-			if ( show == 1 )
+			if (show_)
 			{
 				std::cout << "The lc hull of the lower half at level " << i<< "\n";
 				current->leftchild->Ql.print();
@@ -1130,7 +1130,7 @@ void Tree::add_node(point newPoint)
 				current = current->rightchild;
 			i++;
 		}
-		if ( current == root )
+		if ( current == root_ )
 		{
 			if ( current->label <= newNode->label )
 			{
@@ -1148,7 +1148,7 @@ void Tree::add_node(point newPoint)
 				newNode->parent = newLabel;
 				newLabel->rightchild->parent = newLabel;
 			}
-			root = newLabel;
+			root_ = newLabel;
 		}
 		else
 		{
@@ -1246,13 +1246,13 @@ void Tree::updateBalanceFactor(tree_node *current, bool right)
 			else
 				updateHull(current);
 		}
-		if ( (current == root) || (current->balance_factor == 0) )
+		if ( (current == root_) || (current->balance_factor == 0) )
 			updatelabel = false;
 		else if ( current == current->parent->rightchild )
 			right = true;
 		else
 			right = false;
-		if ( show == 1 )
+		if (show_)
 		{
 			std::cout << "The updated lc-hull of the node with label " << current->label<< "\n";
 			current->Ql.print();
@@ -1265,7 +1265,7 @@ void Tree::updateBalanceFactor(tree_node *current, bool right)
 	}
 }
 
-void Tree::delete_node(point pointToDelete)
+void Tree::delete_node(const point &pointToDelete)
 {
 	bool right, uLabel, update;
 	double newLabel;
@@ -1273,18 +1273,19 @@ void Tree::delete_node(point pointToDelete)
 	nodeToDelete = search_node(pointToDelete);
 	if ( nodeToDelete != NULL )
 	{
-		if ( nodeToDelete == root )
-			root = NULL;
+		if ( nodeToDelete == root_ )
+			// TODO: (check if root has to be deleted
+			root_ = NULL;
 		else 
 		{
 			parent = nodeToDelete->parent;
-			if ( parent == root )
+			if ( parent == root_ )
 			{
 				if ( parent->rightchild ==  nodeToDelete )
-					root = parent->leftchild;
+					root_ = parent->leftchild;
 				else
-					root = parent->rightchild;
-				root->parent = NULL;
+					root_ = parent->rightchild;
+				root_->parent = NULL;
 			}
 			else
 			{
@@ -1312,12 +1313,14 @@ void Tree::delete_node(point pointToDelete)
 				}
 				brother->parent = parent->parent;
 				if ( parent->parent->parent != NULL )
+				{
 					if ( (parent->parent->parent->rightchild ==  parent->parent) && (right) )
 						uLabel = false;
 					else if ( !right )
 						uLabel = true;
 					else
 						uLabel = false;
+				}
 				if ( brother->rightchild == NULL )
 					updateBalanceFactor_delete(parent->parent, right, uLabel, update, brother->label);
 				else
@@ -1411,13 +1414,15 @@ void Tree::updateBalanceFactor_delete(tree_node *current, bool right, bool updat
 				updateHull(current);
 		}
 		if ( current->parent != NULL )
+		{
 			if ( current->parent->rightchild == current )
 				right = true;
 			else
 				right = false;
+		}
 		if ( (current->balance_factor != 0) && (!balanced) )
 			updateBF = false;
-		if ( show == 1 )
+		if (show_)
 		{
 			std::cout << "The updated lc-hull of the node with label " << current->label<< "\n";
 			current->Ql.print();
@@ -1428,30 +1433,36 @@ void Tree::updateBalanceFactor_delete(tree_node *current, bool right, bool updat
 		}
 		current = current->parent;
 		if ( current != NULL )
+		{
 			if ( current->parent != NULL )
+			{
 				if ( (current->parent->rightchild == current) && (right) )
 					updateLabel = false;
 				else if ( !right )
 					updateLabel = true;
 				else
 					updateLabel = false;
+			}
 			else if ( !right )
+			{
 				updateLabel = true;
+			}
 			else
+			{
 				updateLabel = false;
+			}
+		}
 	}
 }
 
-tree_node *Tree::search_node(point pointToSearch)
+tree_node *Tree::search_node(const point &pointToSearch)
 {
-	tree_node *current;
-	current = root;
-	int i;
-	i = 1;
+	tree_node *current = root_;
+	int i(1);
 	while ( current->rightchild != NULL )
 	{
 		buildChildrensHulls(current);
-		if ( show == 1 )
+		if (show_)
 		{
 			std::cout << "The lc-hull of the lower half at level " << i<< "\n";
 			current->leftchild->Ql.print();
@@ -1480,7 +1491,7 @@ tree_node *Tree::search_node(point pointToSearch)
 
 void Tree::print()
 {
-	printValues(root, 0);
+	printValues(root_, 0);
 }
 
 void Tree::printValues(tree_node *printNode, int indent)
@@ -1500,4 +1511,14 @@ void Tree::printValues(tree_node *printNode, int indent)
 		printValues(printNode->leftchild, indent+1);
 		printValues(printNode->rightchild, indent+1);
 	}
+}
+
+tree_node* Tree::root() const
+{
+	return root_;
+}
+
+void Tree::set_show(const bool &show)
+{
+	show_ = show;
 }

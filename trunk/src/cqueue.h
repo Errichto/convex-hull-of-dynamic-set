@@ -19,11 +19,28 @@
 
 #include <iostream>
 
-using namespace std;
+enum node_type
+{
+	LEAF_NODE = 0 ,
+	TWO_NODE,
+	THREE_NODE,
+};
 
 struct node 
 {
-	int type; // type 0 is for leaf, 1 is for 2node, 2 is for 3node
+	node() : type(LEAF_NODE),
+					data1(0.0),
+					data2(0.0),
+					x_coord(0.0),
+					left(NULL),
+					middle(NULL),
+					right(NULL),
+					biggest_y(NULL),
+					smallest_y(NULL)
+	{
+	}
+
+	node_type type; // type 0 is for leaf, 1 is for 2node, 2 is for 3node
 	double data1, data2, x_coord; // on leaf nodes, data2 is the y-coordinate of the point 
 	node *left, *middle, *right, *parent, *biggest_y, *smallest_y;//
 }; 
@@ -31,36 +48,38 @@ struct node
 class ConcatenableQueue 
 {
 public:
-	node *root;
 	ConcatenableQueue();
-	ConcatenableQueue(double, double);
-	void add_node(double, double);
-	void delete_node(double);
-	bool is_empty();
+	ConcatenableQueue(const double &x_coord, const double &y_coord);
+	void addNode(const double &x_coord, const double &y_coord);
+	void deleteNode(const double &value);
+	bool isEmpty() const;
 	void print();
-	void search(double);
-	int height();
-	void addChild(node*, node*, double);
-	node *rightmostNodeAtLevel(int, node*);
-	node *leftmostNodeAtLevel(int, node*);	
+	void search(const double &value);
+	int height() const;
+	void addChildNode(node *child, node *aux, const double &value);
+	node *rightmostNodeAtLevel(const int &level, node*);
+	node *leftmostNodeAtLevel(const int &level, node*);	
+	node *root();
+	void set_root(node *new_root);
 private:
-	node *create_LeafNode(double, double);
-	node *create_2Node(double, double, node*, node*);
-	node *searchForInsert(node*, node*);
-	node *searchLeafNode(double, node*);
-	void deleteNode(node*);
-	void updateValuesInsert(node*, double);
-	void updateValuesDelete(node*, double, double);
-	void printValues(node*, int);
+	node *createLeafNode(const double &x_coord, const double &y_coord);
+	node *create2Node(const double &l_value, const double &m_value, node *left_child, node *right_child);
+	node *searchForInsert(node *new_node, node *current_node);
+	node *searchLeafNode(const double &value, node *current);
+	void deleteNode(node *node_to_delete);
+	void updateValuesInsert(node *current_node, double value);
+	void updateValuesDelete(node *current_node, const double &current_value, const double &new_value);
+	void printValues(node *current_node, const int &indent);
+	node *root_;
 };
 
 //Procedures concatenate and split concatenable queues
 ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2);
 
 //split_left, CQ1 keeps the node with value val 
-void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, double val);
+void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value);
 
 //split_right, CQ2 keeps the node with value val 
-void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, double val);
+void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value);
 
 #endif /*__CQUEUE_H__*/
