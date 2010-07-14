@@ -19,166 +19,166 @@ Tree::Tree() : root_(NULL), show_(false)
 {
 }
 
-void Tree::updateHull(tree_node *current)
+void Tree::updateHull(tree_node *current_node)
 {
 	ConcatenableQueue upperLcHull, upperRcHull, lowerLcHull, lowerRcHull, completeLcHull, completeRcHull, aux1, aux2, aux3, aux4;
-	//printf("current label %f \n", current->label);
-	updateBridge_Hull(current,0);
+	//printf("current_node label %f \n", current_node->label);
+	updateBridgeHull(current_node, 0);
 	//printf("dd\n");
 	//printf("**********\n");
-	updateBridge_Hull(current,1);
-	//printf("b1.x = %f b1.y = %f b.x=%f b2.y = %f\n",current->bridge1_rc.x_coord,current->bridge1_rc.y_coord, current->bridge2_rc.x_coord,current->bridge2_rc.y_coord);
-	split_left(current->leftchild->Ql,&lowerLcHull, &aux1, current->bridge1_lc.y_coord);
-	split_left(current->leftchild->Qr,&lowerRcHull, &aux3, current->bridge1_rc.y_coord);
-	current->leftchild->Ql = aux1;
-	current->leftchild->Qr = aux3;
-	split_right(current->rightchild->Ql, &aux2, &upperLcHull, current->bridge2_lc.y_coord);
-	split_right(current->rightchild->Qr, &aux4, &upperRcHull, current->bridge2_rc.y_coord);
-	current->rightchild->Ql = aux2;
-	current->rightchild->Qr = aux4;
+	updateBridgeHull(current_node, 1);
+	//printf("b1.x = %f b1.y = %f b.x=%f b2.y = %f\n",current_node->bridge1_rc.x_coord,current_node->bridge1_rc.y_coord, current_node->bridge2_rc.x_coord,current_node->bridge2_rc.y_coord);
+	split_left(current_node->leftchild->Ql,&lowerLcHull, &aux1, current_node->bridge1_lc.y_coord);
+	split_left(current_node->leftchild->Qr,&lowerRcHull, &aux3, current_node->bridge1_rc.y_coord);
+	current_node->leftchild->Ql = aux1;
+	current_node->leftchild->Qr = aux3;
+	split_right(current_node->rightchild->Ql, &aux2, &upperLcHull, current_node->bridge2_lc.y_coord);
+	split_right(current_node->rightchild->Qr, &aux4, &upperRcHull, current_node->bridge2_rc.y_coord);
+	current_node->rightchild->Ql = aux2;
+	current_node->rightchild->Qr = aux4;
 	completeLcHull = concatenate(lowerLcHull,upperLcHull);
 	completeRcHull = concatenate(lowerRcHull,upperRcHull);
-	current->Ql = completeLcHull;   
-	current->Qr = completeRcHull;
+	current_node->Ql = completeLcHull;   
+	current_node->Qr = completeRcHull;
 }
 
 //bridge lc hull operations
 
-void Tree::get_points_righthalf(node *v, point *p, point *p0, point *p1, int *flag)
+void Tree::getPointsRightHalf(node *v_node, point *p, point *p0, point *p1, int &flag)
 {
-	if ( v->left->type != 0 )
+	if ( v_node->left->type != LEAF_NODE )
 	{
-		*flag = 0;
-		p->x_coord = v->right->smallest_y->x_coord;
-		p->y_coord = v->right->smallest_y->data2;
-		if ( v->type == 2 )
+		flag = 0;
+		p->x_coord = v_node->right->smallest_y->x_coord;
+		p->y_coord = v_node->right->smallest_y->data2;
+		if ( v_node->type == THREE_NODE )
 		{
-			p0->x_coord = v->middle->biggest_y->x_coord;
-			p0->y_coord = v->middle->biggest_y->data2;
+			p0->x_coord = v_node->middle->biggest_y->x_coord;
+			p0->y_coord = v_node->middle->biggest_y->data2;
 		}
 		else
 		{
-			p0->x_coord = v->left->biggest_y->x_coord;
-			p0->y_coord = v->left->biggest_y->data2;
+			p0->x_coord = v_node->left->biggest_y->x_coord;
+			p0->y_coord = v_node->left->biggest_y->data2;
 		}
-		if ( v->right->smallest_y->parent->type == 2 )
+		if ( v_node->right->smallest_y->parent->type == THREE_NODE )
 		{
-			p1->x_coord = v->right->smallest_y->parent->middle->x_coord;
-			p1->y_coord = v->right->smallest_y->parent->middle->data2;
+			p1->x_coord = v_node->right->smallest_y->parent->middle->x_coord;
+			p1->y_coord = v_node->right->smallest_y->parent->middle->data2;
 		}
 		else
 		{
-		p1->x_coord = v->right->smallest_y->parent->right->x_coord;
-		p1->y_coord = v->right->smallest_y->parent->right->data2;
+		p1->x_coord = v_node->right->smallest_y->parent->right->x_coord;
+		p1->y_coord = v_node->right->smallest_y->parent->right->data2;
 		}
 	}
 	else
 	{
-		p0->x_coord = v->left->x_coord;
-		p0->y_coord = v->left->data2;
-		if ( v->type == 2 )
+		p0->x_coord = v_node->left->x_coord;
+		p0->y_coord = v_node->left->data2;
+		if ( v_node->type == THREE_NODE )
 		{
-			p->x_coord = v->middle->x_coord;
-			p->y_coord = v->middle->data2;
-			p1->x_coord = v->right->x_coord;
-			p1->y_coord = v->right->data2;
-			*flag = 0;
+			p->x_coord = v_node->middle->x_coord;
+			p->y_coord = v_node->middle->data2;
+			p1->x_coord = v_node->right->x_coord;
+			p1->y_coord = v_node->right->data2;
+			flag = 0;
 		}
 		else
 		{
-			p->x_coord = v->right->x_coord;
-			p->y_coord = v->right->data2;
-			if ( v->parent == NULL )
-				*flag = 1;
+			p->x_coord = v_node->right->x_coord;
+			p->y_coord = v_node->right->data2;
+			if ( v_node->parent == NULL )
+				flag = 1;
 			else
 			{
-				if ( v->parent->right == v )
-					*flag = 1;
-				else if ( (v->parent->middle == v) || (v->parent->type == 1) )
+				if ( v_node->parent->right == v_node )
+					flag = 1;
+				else if ( (v_node->parent->middle == v_node) || (v_node->parent->type == TWO_NODE) )
 				{
-					p1->x_coord = v->parent->right->smallest_y->x_coord;
-					p1->y_coord = v->parent->right->smallest_y->data2;
-					*flag = 0;
+					p1->x_coord = v_node->parent->right->smallest_y->x_coord;
+					p1->y_coord = v_node->parent->right->smallest_y->data2;
+					flag = 0;
 				}
 				else
 				{
-					p1->x_coord = v->parent->middle->smallest_y->x_coord;
-					p1->y_coord = v->parent->middle->smallest_y->data2;
-					*flag = 0;
+					p1->x_coord = v_node->parent->middle->smallest_y->x_coord;
+					p1->y_coord = v_node->parent->middle->smallest_y->data2;
+					flag = 0;
 				}
 			}
 		}
 	}
 }
 
-void Tree::get_points_lefthalf(node *v, point *q, point *q0, point *q1, int *flag)
+void Tree::getPointsLeftHalf(node *v_node, point *q, point *q0, point *q1, int &flag)
 {
-	if ( v->left->type != 0 )
+	if ( v_node->left->type != LEAF_NODE )
 	{
-		*flag = 0;
-		q->x_coord = v->left->biggest_y->x_coord;
-		q->y_coord = v->left->biggest_y->data2;
-		if ( v->type == 2 )
+		flag = 0;
+		q->x_coord = v_node->left->biggest_y->x_coord;
+		q->y_coord = v_node->left->biggest_y->data2;
+		if ( v_node->type == THREE_NODE )
 		{
-			q1->x_coord = v->middle->smallest_y->x_coord;
-			q1->y_coord = v->middle->smallest_y->data2;
+			q1->x_coord = v_node->middle->smallest_y->x_coord;
+			q1->y_coord = v_node->middle->smallest_y->data2;
 		}
 		else
 		{
-			q1->x_coord = v->right->smallest_y->x_coord;
-			q1->y_coord = v->right->smallest_y->data2;
+			q1->x_coord = v_node->right->smallest_y->x_coord;
+			q1->y_coord = v_node->right->smallest_y->data2;
 		}
-		if ( v->left->biggest_y->parent->type == 2 )
+		if ( v_node->left->biggest_y->parent->type == THREE_NODE )
 		{
-			q0->x_coord = v->left->biggest_y->parent->middle->x_coord;
-			q0->y_coord = v->left->biggest_y->parent->middle->data2;
+			q0->x_coord = v_node->left->biggest_y->parent->middle->x_coord;
+			q0->y_coord = v_node->left->biggest_y->parent->middle->data2;
 		}
 		else
 		{
-			q0->x_coord = v->left->biggest_y->parent->left->x_coord;
-			q0->y_coord = v->left->biggest_y->parent->left->data2;
+			q0->x_coord = v_node->left->biggest_y->parent->left->x_coord;
+			q0->y_coord = v_node->left->biggest_y->parent->left->data2;
 		}
 	}
 	else
 	{
-		q1->x_coord = v->right->x_coord;
-		q1->y_coord = v->right->data2;
-		if ( v->type == 2 )
+		q1->x_coord = v_node->right->x_coord;
+		q1->y_coord = v_node->right->data2;
+		if ( v_node->type == THREE_NODE )
 		{
-			q->x_coord = v->middle->x_coord;
-			q->y_coord = v->middle->data2;
-			q0->x_coord = v->left->x_coord;
-			q0->y_coord = v->left->data2;
-			*flag = 0;
+			q->x_coord = v_node->middle->x_coord;
+			q->y_coord = v_node->middle->data2;
+			q0->x_coord = v_node->left->x_coord;
+			q0->y_coord = v_node->left->data2;
+			flag = 0;
 		}
 		else
 		{
-			q->x_coord = v->left->x_coord;
-			q->y_coord = v->left->data2;
-			if ( v->parent == NULL )
-				*flag = 1;
+			q->x_coord = v_node->left->x_coord;
+			q->y_coord = v_node->left->data2;
+			if ( v_node->parent == NULL )
+				flag = 1;
 			else
 			{
-				if ( v->parent->left == v )
-					*flag = 1;
-				else if ( (v->parent->middle == v) || (v->parent->type == 1) )
+				if ( v_node->parent->left == v_node )
+					flag = 1;
+				else if ( (v_node->parent->middle == v_node) || (v_node->parent->type == TWO_NODE) )
 				{
-					q0->x_coord = v->parent->left->biggest_y->x_coord;
-					q0->y_coord = v->parent->left->biggest_y->data2;
-					*flag = 0;
+					q0->x_coord = v_node->parent->left->biggest_y->x_coord;
+					q0->y_coord = v_node->parent->left->biggest_y->data2;
+					flag = 0;
 				}
 				else
 				{
-					q0->x_coord = v->parent->middle->biggest_y->x_coord;
-					q0->y_coord = v->parent->middle->biggest_y->data2;
-					*flag = 0;
+					q0->x_coord = v_node->parent->middle->biggest_y->x_coord;
+					q0->y_coord = v_node->parent->middle->biggest_y->data2;
+					flag = 0;
 				}
 			}
 		}
 	}
 }
 
-int Tree::right_turn(point p0, point p1, point p2)
+int Tree::rightTurn(const point &p0, const point &p1, const point &p2) const
 {
 	double cross_prod;
 	cross_prod = ((p2.x_coord - p0.x_coord)*(p1.y_coord - p0.y_coord))-((p2.y_coord - p0.y_coord)*(p1.x_coord - p0.x_coord));
@@ -190,7 +190,8 @@ int Tree::right_turn(point p0, point p1, point p2)
 		return 1;  //turn right
 }
 
-double Tree::case9(point p, point p0, point p1, point q, point q0, point q1)
+double Tree::case9(const point &p, const point &p0, const point &p1,
+				const point &q, const point &q0, const point &q1) const
 {
 	double m1, m2, mp, mq, bp, bq;
 	m2 = (p.y_coord-p1.y_coord)/(p.x_coord-p1.x_coord);
@@ -226,19 +227,21 @@ double Tree::case9(point p, point p0, point p1, point q, point q0, point q1)
 	return ((mq*bp)-(mp*bq))/(mq-mp);
 }
 
-int Tree::bridge_cases_lcHull(point p, point p0, point p1, point q, point q0, point q1, double half, int flag_lh, int flag_uh)
+int Tree::bridgeCasesLcHull(const point &p, const point &p0, const point &p1,
+					const point &q, const point &q0, const point &q1,
+					const double &half, const int &flag_lh, const int &flag_uh) const
 {
 	int chck_p0, chck_p1, chck_q0, chck_q1;
 	double intersec;
 	if ( flag_lh == 0 )
 	{
-		chck_q0 = right_turn(p,q,q0);
-		chck_q1 = right_turn(p,q,q1);
+		chck_q0 = rightTurn(p,q,q0);
+		chck_q1 = rightTurn(p,q,q1);
 	}
 	else if ( flag_lh == 1 )
 	{
 		chck_q0 = 0;
-		chck_q1 = right_turn(p,q,q1);
+		chck_q1 = rightTurn(p,q,q1);
 	}
 	else
 	{
@@ -247,13 +250,13 @@ int Tree::bridge_cases_lcHull(point p, point p0, point p1, point q, point q0, po
 	}
 	if ( flag_uh == 0 )
 	{
-		chck_p0 = right_turn(q,p,p0);
-		chck_p1 = right_turn(q,p,p1);
+		chck_p0 = rightTurn(q,p,p0);
+		chck_p1 = rightTurn(q,p,p1);
 	}
 	else if ( flag_uh == 1 )
 	{
 		chck_p1 = 1;
-		chck_p0 = right_turn(q,p,p0);
+		chck_p0 = rightTurn(q,p,p0);
 	}
 	else
 	{
@@ -286,19 +289,21 @@ int Tree::bridge_cases_lcHull(point p, point p0, point p1, point q, point q0, po
 	}
 }
 
-int Tree::bridge_cases_rcHull(point p, point p0, point p1, point q, point q0, point q1, double half, int flag_lh, int flag_uh)
+int Tree::bridgeCasesRcHull(const point &p, const point &p0, const point &p1,
+					const point &q, const point &q0, const point &q1,
+					const double &half, const int &flag_lh, const int &flag_uh) const
 {
 	int chck_p0, chck_p1, chck_q0, chck_q1;
 	double intersec;
 	if ( flag_lh == 0 )
 	{
-		chck_q0 = right_turn(p,q,q0);
-		chck_q1 = right_turn(p,q,q1);
+		chck_q0 = rightTurn(p,q,q0);
+		chck_q1 = rightTurn(p,q,q1);
 	}
 	else if ( flag_lh == 1 )
 	{
 		chck_q0 = 1;
-		chck_q1 = right_turn(p,q,q1);
+		chck_q1 = rightTurn(p,q,q1);
 	}
 	else
 	{
@@ -307,13 +312,13 @@ int Tree::bridge_cases_rcHull(point p, point p0, point p1, point q, point q0, po
 	}
 	if ( flag_uh == 0 )
 	{
-		chck_p0 = right_turn(q,p,p0);
-		chck_p1 = right_turn(q,p,p1);
+		chck_p0 = rightTurn(q,p,p0);
+		chck_p1 = rightTurn(q,p,p1);
 	}
 	else if ( flag_uh == 1 )
 	{
 		chck_p1 = 0;
-		chck_p0 = right_turn(q,p,p0);
+		chck_p0 = rightTurn(q,p,p0);
 	}
 	else
 	{
@@ -346,69 +351,69 @@ int Tree::bridge_cases_rcHull(point p, point p0, point p1, point q, point q0, po
 	}
 }
 
-node *Tree::newSS_lh_left(node *current, point *q, point *q0, point *q1, bool *onepoint)
+node *Tree::newSSLhLeft(node *current, point &q, point &q0, point &q1, bool &onepoint)
 {
-	if ( current->type == 0 )
+	if ( current->type == LEAF_NODE )
 	{
-		if ( !*onepoint )
+		if ( !onepoint )
 		{
-			*onepoint = true;
+			onepoint = true;
 			if ( current->parent != NULL )
 			{
 				if ( current->parent->right == current )
 				{
-					q1->y_coord = q->y_coord;
-					q1->x_coord = q->x_coord;
-					if ( current->parent->type == 2 )
+					q1.y_coord = q.y_coord;
+					q1.x_coord = q.x_coord;
+					if ( current->parent->type == THREE_NODE )
 					{
-						q->y_coord = current->parent->middle->data2;
-						q->x_coord = current->parent->middle->x_coord;
+						q.y_coord = current->parent->middle->data2;
+						q.x_coord = current->parent->middle->x_coord;
 					}
 					else
 					{
-						q->y_coord = current->parent->left->data2;
-						q->x_coord = current->parent->left->x_coord;
+						q.y_coord = current->parent->left->data2;
+						q.x_coord = current->parent->left->x_coord;
 					}
-					*onepoint = false;
+					onepoint = false;
 				}
 			}
 		}
 		return NULL;
 	}
-	else if ( current->left->type == 0 )
+	else if ( current->left->type == LEAF_NODE )
 	{
-		if ( current->type == 2 )
+		if ( current->type == THREE_NODE )
 		{
-			q1->x_coord = q->x_coord;
-			q1->y_coord = q->y_coord;
-			*onepoint = false;
+			q1.x_coord = q.x_coord;
+			q1.y_coord = q.y_coord;
+			onepoint = false;
 		}
 		else
-			*onepoint = true;
-		q->x_coord = current->left->x_coord;
-		q->y_coord = current->left->data2;
+			onepoint = true;
+		q.x_coord = current->left->x_coord;
+		q.y_coord = current->left->data2;
 		return current->left;
 	}
-	else if ( q->y_coord == current->left->biggest_y->data2 )
+	else if ( q.y_coord == current->left->biggest_y->data2 )
 		return current->left;
-	else if ( q->y_coord == current->right->smallest_y->data2 )
+	else if ( q.y_coord == current->right->smallest_y->data2 )
 	{
-		q1->y_coord = q->y_coord;
-		q1->x_coord = q->x_coord;
-		q->y_coord = q0->y_coord;
-		q->x_coord = q0->x_coord;
-		*onepoint = false;
+		q1.y_coord = q.y_coord;
+		q1.x_coord = q.x_coord;
+		q.y_coord = q0.y_coord;
+		q.x_coord = q0.x_coord;
+		onepoint = false;
 		return current->right->smallest_y;
 	}
 	else
 	{
-		if ( q->y_coord == current->middle->smallest_y->data2 )
+		if ( q.y_coord == current->middle->smallest_y->data2 )
 		{
-			q1->y_coord = q->y_coord;
-			q1->x_coord = q->x_coord;
-			q->y_coord = q0->y_coord;
-			q->x_coord = q0->x_coord;
-			*onepoint = false;
+			q1.y_coord = q.y_coord;
+			q1.x_coord = q.x_coord;
+			q.y_coord = q0.y_coord;
+			q.x_coord = q0.x_coord;
+			onepoint = false;
 			return current->right->smallest_y;
 		}
 		else
@@ -416,69 +421,69 @@ node *Tree::newSS_lh_left(node *current, point *q, point *q0, point *q1, bool *o
 	}
 }
 
-node *Tree::newSS_uh_right(node *current, point *p, point *p0, point *p1, bool *onepoint)
+node *Tree::newSSUhRight(node *current, point &p, point &p0, point &p1, bool &onepoint)
 {
-	if ( current->type == 0 )
+	if ( current->type == LEAF_NODE )
 	{
-		if ( !*onepoint )
+		if ( !onepoint )
 		{
-			*onepoint = true;
+			onepoint = true;
 			if ( current->parent != NULL )
 			{
 				if ( current->parent->left == current )
 				{
-					p0->y_coord = p->y_coord;
-					p0->x_coord = p->x_coord;
-					if ( current->parent->type == 2 )
+					p0.y_coord = p.y_coord;
+					p0.x_coord = p.x_coord;
+					if ( current->parent->type == THREE_NODE )
 					{
-						p->y_coord = current->parent->middle->data2;
-						p->x_coord = current->parent->middle->x_coord;
+						p.y_coord = current->parent->middle->data2;
+						p.x_coord = current->parent->middle->x_coord;
 					}
 					else
 					{
-						p->y_coord = current->parent->right->data2;
-						p->x_coord = current->parent->right->x_coord;
+						p.y_coord = current->parent->right->data2;
+						p.x_coord = current->parent->right->x_coord;
 					}
-					*onepoint = false;
+					onepoint = false;
 				}
 			}
 		}
 		return NULL;
 	}
-	else if ( current->right->type == 0 )
+	else if ( current->right->type == LEAF_NODE )
 	{
-		if ( current->type == 2 )
+		if ( current->type == THREE_NODE )
 		{
-			p0->x_coord = p->x_coord;
-			p0->y_coord = p->y_coord;
-			*onepoint = false;
+			p0.x_coord = p.x_coord;
+			p0.y_coord = p.y_coord;
+			onepoint = false;
 		}
 		else
-			*onepoint = true;
-		p->x_coord = current->right->x_coord;
-		p->y_coord = current->right->data2;
+			onepoint = true;
+		p.x_coord = current->right->x_coord;
+		p.y_coord = current->right->data2;
 		return current->right;
 	}
-	else if ( p->y_coord == current->right->smallest_y->data2 )
+	else if ( p.y_coord == current->right->smallest_y->data2 )
 		return current->right;
-	else if ( p->y_coord == current->left->biggest_y->data2 )
+	else if ( p.y_coord == current->left->biggest_y->data2 )
 	{
-		p0->y_coord = p->y_coord;
-		p0->x_coord = p->x_coord;
-		p->y_coord = p1->y_coord;
-		p->x_coord = p1->x_coord;
-		*onepoint = false;
+		p0.y_coord = p.y_coord;
+		p0.x_coord = p.x_coord;
+		p.y_coord = p1.y_coord;
+		p.x_coord = p1.x_coord;
+		onepoint = false;
 		return current->left->biggest_y;
 	}
 	else
 	{
-		if ( p->y_coord == current->middle->biggest_y->data2 )
+		if ( p.y_coord == current->middle->biggest_y->data2 )
 		{
-			p0->y_coord = p->y_coord;
-			p0->x_coord = p->x_coord;
-			p->y_coord = p1->y_coord;
-			p->x_coord = p1->x_coord;
-			*onepoint = false;
+			p0.y_coord = p.y_coord;
+			p0.x_coord = p.x_coord;
+			p.y_coord = p1.y_coord;
+			p.x_coord = p1.x_coord;
+			onepoint = false;
 			return current->middle->biggest_y;
 		}
 		else
@@ -486,219 +491,218 @@ node *Tree::newSS_uh_right(node *current, point *p, point *p0, point *p1, bool *
 	}
 }
 
-node *Tree::newSS_lh_right(node *current, point *q, point *q0, point *q1, bool *onepoint, bool *out)
+node *Tree::newSSLhRight(node *current, point &q, point &q0, point &q1, bool &onepoint, bool &out)
 {
 	double x,y;
-	node *newcurrent;
-	newcurrent = NULL;
-	if ( current->type == 0 )
+	node *newcurrent = NULL;
+	if ( current->type == LEAF_NODE )
 	{
-		*out = true;
+		out = true;
 	}
-	else if ( current->left->type == 0 )
+	else if ( current->left->type == LEAF_NODE )
 	{
-		*onepoint = false;
-		*out = true;
+		onepoint = false;
+		out = true;
 		newcurrent = current->right;
 	}
-	else if ( q->y_coord == current->right->smallest_y->data2 )
+	else if ( q.y_coord == current->right->smallest_y->data2 )
 	{
 		newcurrent = current->right;
-		*out = true;
+		out = true;
 	}
-	else if ( current->type == 2 )
+	else if ( current->type == THREE_NODE )
 	{
-		x = q1->x_coord;
-		y = q1->y_coord;
-		if ( q->y_coord == current->left->biggest_y->data2 )
+		x = q1.x_coord;
+		y = q1.y_coord;
+		if ( q.y_coord == current->left->biggest_y->data2 )
 		{
-			if ( current->middle->smallest_y->parent->type == 2 )
+			if ( current->middle->smallest_y->parent->type == THREE_NODE )
 			{
-				q1->x_coord = current->middle->smallest_y->parent->middle->x_coord;
-				q1->y_coord = current->middle->smallest_y->parent->middle->data2;
+				q1.x_coord = current->middle->smallest_y->parent->middle->x_coord;
+				q1.y_coord = current->middle->smallest_y->parent->middle->data2;
 			}
 			else
 			{
-				q1->x_coord = current->middle->smallest_y->parent->right->x_coord;
-				q1->y_coord = current->middle->smallest_y->parent->right->data2;
+				q1.x_coord = current->middle->smallest_y->parent->right->x_coord;
+				q1.y_coord = current->middle->smallest_y->parent->right->data2;
 			}
-			q0->x_coord = q->x_coord;
-			q0->y_coord = q->y_coord;
-			q->x_coord = x;
-			q->y_coord = y;
+			q0.x_coord = q.x_coord;
+			q0.y_coord = q.y_coord;
+			q.x_coord = x;
+			q.y_coord = y;
 		}
-		else if ( q->y_coord == current->middle->smallest_y->data2 )
+		else if ( q.y_coord == current->middle->smallest_y->data2 )
 		{
-			q1->x_coord = current->right->smallest_y->x_coord;
-			q1->y_coord = current->right->smallest_y->data2;
-			q->x_coord = current->middle->biggest_y->x_coord;
-			q->y_coord = current->middle->biggest_y->data2;
-			if ( current->middle->biggest_y->parent->type == 2 )
+			q1.x_coord = current->right->smallest_y->x_coord;
+			q1.y_coord = current->right->smallest_y->data2;
+			q.x_coord = current->middle->biggest_y->x_coord;
+			q.y_coord = current->middle->biggest_y->data2;
+			if ( current->middle->biggest_y->parent->type == THREE_NODE )
 			{
-				q0->x_coord = current->middle->biggest_y->parent->middle->x_coord;
-				q0->y_coord = current->middle->biggest_y->parent->middle->data2;
+				q0.x_coord = current->middle->biggest_y->parent->middle->x_coord;
+				q0.y_coord = current->middle->biggest_y->parent->middle->data2;
 			}
 			else
 			{
-				q0->x_coord = current->middle->biggest_y->parent->left->x_coord;
-				q0->y_coord = current->middle->biggest_y->parent->left->data2;
+				q0.x_coord = current->middle->biggest_y->parent->left->x_coord;
+				q0.y_coord = current->middle->biggest_y->parent->left->data2;
 			}
 		}
 		else
 		{
-			if ( current->right->smallest_y->parent->type == 2 )
+			if ( current->right->smallest_y->parent->type == THREE_NODE )
 			{
-				q1->x_coord = current->right->smallest_y->parent->middle->x_coord;
-				q1->y_coord = current->right->smallest_y->parent->middle->data2;
+				q1.x_coord = current->right->smallest_y->parent->middle->x_coord;
+				q1.y_coord = current->right->smallest_y->parent->middle->data2;
 			}
 			else
 			{
-				q1->x_coord = current->right->smallest_y->parent->right->x_coord;
-				q1->y_coord = current->right->smallest_y->parent->right->data2;
+				q1.x_coord = current->right->smallest_y->parent->right->x_coord;
+				q1.y_coord = current->right->smallest_y->parent->right->data2;
 			}
-			q0->x_coord = q->x_coord;
-			q0->y_coord = q->y_coord;
-			q->x_coord = x;
-			q->y_coord = y;
+			q0.x_coord = q.x_coord;
+			q0.y_coord = q.y_coord;
+			q.x_coord = x;
+			q.y_coord = y;
 		}
 	}
 	else
 	{
-		x = q1->x_coord;
-		y = q1->y_coord;
-		if ( current->right->smallest_y->parent->type == 2 )
+		x = q1.x_coord;
+		y = q1.y_coord;
+		if ( current->right->smallest_y->parent->type == THREE_NODE )
 		{
-			q1->x_coord = current->right->smallest_y->parent->middle->x_coord;
-			q1->y_coord = current->right->smallest_y->parent->middle->data2;
+			q1.x_coord = current->right->smallest_y->parent->middle->x_coord;
+			q1.y_coord = current->right->smallest_y->parent->middle->data2;
 		}
 		else
 		{
-			q1->x_coord = current->right->smallest_y->parent->right->x_coord;
-			q1->y_coord = current->right->smallest_y->parent->right->data2;
+			q1.x_coord = current->right->smallest_y->parent->right->x_coord;
+			q1.y_coord = current->right->smallest_y->parent->right->data2;
 		}
-		q0->x_coord = q->x_coord;
-		q0->y_coord = q->y_coord;
-		q->x_coord = x;
-		q->y_coord = y;
+		q0.x_coord = q.x_coord;
+		q0.y_coord = q.y_coord;
+		q.x_coord = x;
+		q.y_coord = y;
 	}
 	return newcurrent;
 }
 
-node *Tree::newSS_uh_left(node *current, point *p, point *p0, point *p1, bool *onepoint, bool *out)
+node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &onepoint, bool &out)
 {
 	double x,y;
 	node *newcurrent;
 	newcurrent = NULL;
-	if ( current->type == 0 )
-		*out = true;
-	else if ( current->left->type == 0 )
+	if ( current->type == LEAF_NODE )
+		out = true;
+	else if ( current->left->type == LEAF_NODE )
 	{
-		*onepoint = false;
-		*out = true;
+		onepoint = false;
+		out = true;
 		newcurrent = current->left;
 	}
-	else if ( p->y_coord == current->left->biggest_y->data2 )
+	else if ( p.y_coord == current->left->biggest_y->data2 )
 	{
 		newcurrent = current->left;
-		*out = true;
+		out = true;
 	}
-	else if ( current->type == 2 )
+	else if ( current->type == THREE_NODE )
 	{
-		x = p0->x_coord;
-		y = p0->y_coord;
-		if ( p->y_coord == current->right->smallest_y->data2 )
+		x = p0.x_coord;
+		y = p0.y_coord;
+		if ( p.y_coord == current->right->smallest_y->data2 )
 		{
-			if ( current->middle->biggest_y->parent->type == 2 )
+			if ( current->middle->biggest_y->parent->type == THREE_NODE )
 			{
-				p0->x_coord = current->middle->biggest_y->parent->middle->x_coord;
-				p0->y_coord = current->middle->biggest_y->parent->middle->data2;
+				p0.x_coord = current->middle->biggest_y->parent->middle->x_coord;
+				p0.y_coord = current->middle->biggest_y->parent->middle->data2;
 			}
 			else
 			{
-				p0->x_coord = current->middle->biggest_y->parent->left->x_coord;
-				p0->y_coord = current->middle->biggest_y->parent->left->data2;
+				p0.x_coord = current->middle->biggest_y->parent->left->x_coord;
+				p0.y_coord = current->middle->biggest_y->parent->left->data2;
 			}
 
-			p1->x_coord = p->x_coord;
-			p1->y_coord = p->y_coord;
-			p->x_coord = x;
-			p->y_coord = y;
+			p1.x_coord = p.x_coord;
+			p1.y_coord = p.y_coord;
+			p.x_coord = x;
+			p.y_coord = y;
 		}
-		else if ( p->y_coord == current->middle->biggest_y->data2 )
+		else if ( p.y_coord == current->middle->biggest_y->data2 )
 		{
-			p0->x_coord = current->left->biggest_y->x_coord;
-			p0->y_coord = current->left->biggest_y->data2;
-			p->x_coord = current->middle->smallest_y->x_coord;
-			p->y_coord = current->middle->smallest_y->data2;
-			if ( current->middle->smallest_y->parent->type == 2 )
+			p0.x_coord = current->left->biggest_y->x_coord;
+			p0.y_coord = current->left->biggest_y->data2;
+			p.x_coord = current->middle->smallest_y->x_coord;
+			p.y_coord = current->middle->smallest_y->data2;
+			if ( current->middle->smallest_y->parent->type == THREE_NODE )
 			{
-				p1->x_coord = current->middle->smallest_y->parent->middle->x_coord;
-				p1->y_coord = current->middle->smallest_y->parent->middle->data2;
+				p1.x_coord = current->middle->smallest_y->parent->middle->x_coord;
+				p1.y_coord = current->middle->smallest_y->parent->middle->data2;
 			}
 			else
 			{
-				p1->x_coord = current->middle->smallest_y->parent->right->x_coord;
-				p1->y_coord = current->middle->smallest_y->parent->right->data2;
+				p1.x_coord = current->middle->smallest_y->parent->right->x_coord;
+				p1.y_coord = current->middle->smallest_y->parent->right->data2;
 			}
 		}
 		else
 		{
-			if ( current->left->biggest_y->parent->type == 2 )
+			if ( current->left->biggest_y->parent->type == THREE_NODE )
 			{
-				p0->x_coord = current->left->biggest_y->parent->middle->x_coord;
-				p0->y_coord = current->left->biggest_y->parent->middle->data2;
+				p0.x_coord = current->left->biggest_y->parent->middle->x_coord;
+				p0.y_coord = current->left->biggest_y->parent->middle->data2;
 			}
 			else
 			{
-				p0->x_coord = current->left->biggest_y->parent->left->x_coord;
-				p0->y_coord = current->left->biggest_y->parent->left->data2;
+				p0.x_coord = current->left->biggest_y->parent->left->x_coord;
+				p0.y_coord = current->left->biggest_y->parent->left->data2;
 			}
-			p1->x_coord = p->x_coord;
-			p1->y_coord = p->y_coord;
-			p->x_coord = x;
-			p->y_coord = y;
+			p1.x_coord = p.x_coord;
+			p1.y_coord = p.y_coord;
+			p.x_coord = x;
+			p.y_coord = y;
 		}
 	}
 	else
 	{
-		x = p0->x_coord;
-		y = p0->y_coord;
-		if ( current->left->smallest_y->parent->type == 2 )
+		x = p0.x_coord;
+		y = p0.y_coord;
+		if ( current->left->smallest_y->parent->type == THREE_NODE )
 		{
-			p0->x_coord = current->left->biggest_y->parent->middle->x_coord;
-			p0->y_coord = current->left->biggest_y->parent->middle->data2;
+			p0.x_coord = current->left->biggest_y->parent->middle->x_coord;
+			p0.y_coord = current->left->biggest_y->parent->middle->data2;
 		}
 		else
 		{
-			p0->x_coord = current->left->smallest_y->parent->left->x_coord;
-			p0->y_coord = current->left->smallest_y->parent->left->data2;
+			p0.x_coord = current->left->smallest_y->parent->left->x_coord;
+			p0.y_coord = current->left->smallest_y->parent->left->data2;
 		}
-		p1->x_coord = p->x_coord;
-		p1->y_coord = p->y_coord;
-		p->x_coord = x;
-		p->y_coord = y;
+		p1.x_coord = p.x_coord;
+		p1.y_coord = p.y_coord;
+		p.x_coord = x;
+		p.y_coord = y;
 	}
 	return newcurrent;
 }
 
 //
 
-void Tree::buildChildrensHulls(tree_node *parent)
+void Tree::buildChildrensHulls(tree_node *parent_node)
 {
 	ConcatenableQueue upperLcHull, upperRcHull, lowerLcHull, lowerRcHull, completeUpperLcHull, completeUpperRcHull, completeLowerLcHull, completeLowerRcHull;
-	split_right(parent->Ql,&lowerLcHull, &upperLcHull, parent->bridge2_lc.y_coord);
-	split_right(parent->Qr,&lowerRcHull, &upperRcHull, parent->bridge2_rc.y_coord);
-	completeUpperLcHull = concatenate(parent->rightchild->Ql,upperLcHull);
-	completeUpperRcHull = concatenate(parent->rightchild->Qr,upperRcHull);
-	completeLowerLcHull = concatenate(lowerLcHull, parent->leftchild->Ql);
-	completeLowerRcHull = concatenate(lowerRcHull, parent->leftchild->Qr);
-	parent->rightchild->Ql = completeUpperLcHull;
-	parent->leftchild->Ql = completeLowerLcHull; 
-	parent->rightchild->Qr = completeUpperRcHull;
-	parent->leftchild->Qr = completeLowerRcHull;
+	split_right(parent_node->Ql,&lowerLcHull, &upperLcHull, parent_node->bridge2_lc.y_coord);
+	split_right(parent_node->Qr,&lowerRcHull, &upperRcHull, parent_node->bridge2_rc.y_coord);
+	completeUpperLcHull = concatenate(parent_node->rightchild->Ql,upperLcHull);
+	completeUpperRcHull = concatenate(parent_node->rightchild->Qr,upperRcHull);
+	completeLowerLcHull = concatenate(lowerLcHull, parent_node->leftchild->Ql);
+	completeLowerRcHull = concatenate(lowerRcHull, parent_node->leftchild->Qr);
+	parent_node->rightchild->Ql = completeUpperLcHull;
+	parent_node->leftchild->Ql = completeLowerLcHull; 
+	parent_node->rightchild->Qr = completeUpperRcHull;
+	parent_node->leftchild->Qr = completeLowerRcHull;
 }
 
-void Tree::updateBridge_Hull(tree_node *v, int hull)
+void Tree::updateBridgeHull(tree_node *v_node, const int &hull)
 {
 	bool bridgefound, onepoint_lh, onepoint_uh, out;
 	double half;
@@ -710,19 +714,19 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 	onepoint_uh = true;
 	if ( hull == 0 )
 	{
-		current_lh = v->leftchild->Ql.root();
-		current_uh = v->rightchild->Ql.root();
+		current_lh = v_node->leftchild->Ql.root();
+		current_uh = v_node->rightchild->Ql.root();
 	}
 	else
 	{
-		current_lh = v->leftchild->Qr.root();
-		current_uh = v->rightchild->Qr.root();
+		current_lh = v_node->leftchild->Qr.root();
+		current_uh = v_node->rightchild->Qr.root();
 	}
-	if ( (current_lh->type != 0) && (current_uh->type != 0) )
+	if ( (current_lh->type != LEAF_NODE) && (current_uh->type != LEAF_NODE) )
 		half = current_uh->smallest_y->data2 - ((current_uh->smallest_y->data2 - current_lh->biggest_y->data2)/2);
-	else if ( current_lh->type != 0 )
+	else if ( current_lh->type != LEAF_NODE )
 		half = current_uh->data2 - ((current_uh->data2 - current_lh->biggest_y->data2)/2);
-	else if ( current_uh->type != 0 )
+	else if ( current_uh->type != LEAF_NODE )
 		half = current_uh->smallest_y->data2 - ((current_uh->smallest_y->data2 - current_lh->data2)/2);
 	else
 		half = current_uh->data2 - ((current_uh->data2 - current_lh->data2)/2);
@@ -732,16 +736,16 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 	q.y_coord = current_lh->data2;
 	while ( !bridgefound )
 	{
-		if ( (current_lh->type == 0) && (current_uh->type == 0) )
+		if ( (current_lh->type == LEAF_NODE) && (current_uh->type == LEAF_NODE) )
 		{
 			if ( (onepoint_lh) && (onepoint_uh) )
 				bridgefound = true;
 			else if ( onepoint_lh )
 			{
 				if ( hull == 0 )
-					chk_case = bridge_cases_lcHull(p,p0,p1,q,q0,q1,half,2,1);
+					chk_case = bridgeCasesLcHull(p,p0,p1,q,q0,q1,half,2,1);
 				else
-					chk_case = bridge_cases_rcHull(p,p0,p1,q,q0,q1,half,2,1);
+					chk_case = bridgeCasesRcHull(p,p0,p1,q,q0,q1,half,2,1);
 				if ( chk_case != 1 )
 					p = p0;
 				bridgefound = true;
@@ -749,9 +753,9 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 			else if ( onepoint_uh )
 			{
 				if ( hull == 0 )
-					chk_case = bridge_cases_lcHull(p,p0,p1,q,q0,q1,half,1,2);
+					chk_case = bridgeCasesLcHull(p,p0,p1,q,q0,q1,half,1,2);
 				else
-					chk_case = bridge_cases_rcHull(p,p0,p1,q,q0,q1,half,1,2);
+					chk_case = bridgeCasesRcHull(p,p0,p1,q,q0,q1,half,1,2);
 				if ( chk_case != 1 )
 					q = q1;
 				bridgefound = true;
@@ -759,21 +763,21 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 			else
 			{
 				if ( hull == 0 )
-					chk_case = bridge_cases_lcHull(p,p0,p1,q,q0,q1,half,1,1);
+					chk_case = bridgeCasesLcHull(p,p0,p1,q,q0,q1,half,1,1);
 				else
-					chk_case = bridge_cases_rcHull(p,p0,p1,q,q0,q1,half,1,1);
+					chk_case = bridgeCasesRcHull(p,p0,p1,q,q0,q1,half,1,1);
 				if ( chk_case != 1 )
 				{
 					if ( hull == 0 )
-						chk_case = bridge_cases_lcHull(p0,p,p1,q,q0,q1,half,1,2);
+						chk_case = bridgeCasesLcHull(p0,p,p1,q,q0,q1,half,1,2);
 					else
-						chk_case = bridge_cases_rcHull(p0,p,p1,q,q0,q1,half,1,2);
+						chk_case = bridgeCasesRcHull(p0,p,p1,q,q0,q1,half,1,2);
 					if ( chk_case != 1 )
 					{
 						if ( hull == 0 )
-							chk_case = bridge_cases_lcHull(p,p0,p1,q1,q0,q,half,2,1);
+							chk_case = bridgeCasesLcHull(p,p0,p1,q1,q0,q,half,2,1);
 						else
-							chk_case = bridge_cases_rcHull(p,p0,p1,q1,q0,q,half,2,1);
+							chk_case = bridgeCasesRcHull(p,p0,p1,q1,q0,q,half,2,1);
 						if ( chk_case != 1 )
 						{
 							p = p0;
@@ -790,17 +794,17 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 		}
 		else
 		{
-			if ( current_uh->type == 0 )
+			if ( current_uh->type == LEAF_NODE )
 			{
-				get_points_lefthalf(current_lh, &q, &q0, &q1, &flag_lh);
+				getPointsLeftHalf(current_lh, &q, &q0, &q1, flag_lh);
 				if ( onepoint_uh )
 					flag_uh = 2;
 				else
 					flag_uh = 1;
 			}
-			else if ( current_lh->type == 0 )
+			else if ( current_lh->type == LEAF_NODE )
 			{
-				get_points_righthalf(current_uh, &p, &p0, &p1, &flag_uh);
+				getPointsRightHalf(current_uh, &p, &p0, &p1, flag_uh);
 				if ( onepoint_lh )
 					flag_lh = 2;
 				else
@@ -808,16 +812,16 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 			}   
 			else
 			{
-				get_points_lefthalf(current_lh, &q, &q0, &q1, &flag_lh);
-				get_points_righthalf(current_uh, &p, &p0, &p1, &flag_uh);
+				getPointsLeftHalf(current_lh, &q, &q0, &q1, flag_lh);
+				getPointsRightHalf(current_uh, &p, &p0, &p1, flag_uh);
 			}
 			out = false;
 			while (!out)
 			{
 				if ( hull == 0 )
-					chk_case = bridge_cases_lcHull(p,p0,p1,q,q0,q1,half,flag_lh,flag_uh);
+					chk_case = bridgeCasesLcHull(p,p0,p1,q,q0,q1,half,flag_lh,flag_uh);
 				else
-					chk_case = bridge_cases_rcHull(p,p0,p1,q,q0,q1,half,flag_lh,flag_uh);
+					chk_case = bridgeCasesRcHull(p,p0,p1,q,q0,q1,half,flag_lh,flag_uh);
 				switch (chk_case)
 				{
 					case 1:
@@ -827,53 +831,53 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 					case 2:
 					case 4:
 					case 6:
-						aux = newSS_lh_left(current_lh, &q, &q0, &q1, &onepoint_lh);
+						aux = newSSLhLeft(current_lh, q, q0, q1, onepoint_lh);
 						if ( aux != NULL )
 							current_lh = aux;
-						aux = newSS_uh_right(current_uh, &p, &p0, &p1, &onepoint_uh);
+						aux = newSSUhRight(current_uh, p, p0, p1, onepoint_uh);
 						if ( aux != NULL )
 							current_uh = aux;
 						out = true;
 						break;
 					case 7:
-						aux = newSS_lh_left(current_lh, &q, &q0, &q1, &onepoint_lh);
+						aux = newSSLhLeft(current_lh, q, q0, q1, onepoint_lh);
 						if ( aux != NULL )
 							current_lh = aux;
 						out = true;
 						break;
 					case 8:
-						aux = newSS_uh_right(current_uh, &p, &p0, &p1, &onepoint_uh);
+						aux = newSSUhRight(current_uh, p, p0, p1, onepoint_uh);
 						if ( aux != NULL )
 							current_uh = aux;
 						out = true;
 						break;
 					case 3:
-						aux = newSS_lh_right(current_lh, &q, &q0, &q1, &onepoint_lh, &out);
+						aux = newSSLhRight(current_lh, q, q0, q1, onepoint_lh, out);
 						if ( aux != NULL )
 							current_lh = aux;
 						if ( out )
 						{
-							aux = newSS_uh_right(current_uh, &p, &p0, &p1, &onepoint_uh);
+							aux = newSSUhRight(current_uh, p, p0, p1, onepoint_uh);
 							if ( aux != NULL )
 								current_uh = aux;
 						}
 						break;
 					case 5:
-						aux = newSS_uh_left(current_uh, &p, &p0, &p1, &onepoint_uh, &out);
+						aux = newSSUhLeft(current_uh, p, p0, p1, onepoint_uh, out);
 						if ( aux != NULL )
 							current_uh = aux;
 						if ( out )
 						{
-							aux = newSS_lh_left(current_lh, &q, &q0, &q1, &onepoint_lh);
+							aux = newSSLhLeft(current_lh, q, q0, q1, onepoint_lh);
 							if ( aux != NULL )
 								current_lh = aux;
 						}
 						break;
 					case 9:
-						aux = newSS_lh_right(current_lh, &q, &q0, &q1, &onepoint_lh, &out);
+						aux = newSSLhRight(current_lh, q, q0, q1, onepoint_lh, out);
 						if ( aux != NULL )
 							current_lh = aux;
-						if ( (current_lh->type == 0) && (current_uh->type != 0) )
+						if ( (current_lh->type == LEAF_NODE) && (current_uh->type != LEAF_NODE) )
 						{
 							out = false;
 							flag_lh = 2;
@@ -882,10 +886,10 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 						}
 						break;
 					case 10:
-						aux = newSS_uh_left(current_uh, &p, &p0, &p1, &onepoint_uh, &out);
+						aux = newSSUhLeft(current_uh, p, p0, p1, onepoint_uh, out);
 						if ( aux != NULL )
 							current_uh = aux;
-						if ( (current_uh->type == 0) && (current_lh->type != 0) )
+						if ( (current_uh->type == LEAF_NODE) && (current_lh->type != LEAF_NODE) )
 						{
 							out = false;
 							flag_uh = 2;
@@ -899,209 +903,207 @@ void Tree::updateBridge_Hull(tree_node *v, int hull)
 	}
 	if ( hull == 0 )
 	{
-		v->bridge1_lc = q;
-		v->bridge2_lc = p;
+		v_node->bridge1_lc = q;
+		v_node->bridge2_lc = p;
 	}
 	else
 	{
-		v->bridge1_rc = q;
-		v->bridge2_rc = p;
+		v_node->bridge1_rc = q;
+		v_node->bridge2_rc = p;
 	}
 }
 
-tree_node *Tree::create_label(double newLabel, tree_node *leftchild, tree_node *rightchild)
+tree_node *Tree::createLabel(const double &new_label, tree_node *left_child, tree_node *right_child)
 {
-	tree_node *newNode;
-	newNode = new tree_node;
-	newNode->label = newLabel;
-	newNode->Ql = concatenate(leftchild->Ql, rightchild->Ql);
-	newNode->Qr = concatenate(leftchild->Qr, rightchild->Qr);
-	newNode->bridge1_lc = leftchild->p;
-	newNode->bridge2_lc = rightchild->p;
-	newNode->bridge1_rc = leftchild->p;
-	newNode->bridge2_rc = rightchild->p;
-	leftchild->Ql.set_root(NULL);
-	rightchild->Ql.set_root(NULL);
-	leftchild->Qr.set_root(NULL);
-	rightchild->Qr.set_root(NULL);
-	newNode->leftchild = NULL;
-	newNode->rightchild = NULL;
-	newNode->parent = NULL;
-	newNode->balance_factor = 0;
-	return newNode;
+	tree_node *new_node = new tree_node;
+	new_node->label = new_label;
+	new_node->Ql = concatenate(left_child->Ql, right_child->Ql);
+	new_node->Qr = concatenate(left_child->Qr, right_child->Qr);
+	new_node->bridge1_lc = left_child->p;
+	new_node->bridge2_lc = right_child->p;
+	new_node->bridge1_rc = left_child->p;
+	new_node->bridge2_rc = right_child->p;
+	left_child->Ql.set_root(NULL);
+	right_child->Ql.set_root(NULL);
+	left_child->Qr.set_root(NULL);
+	right_child->Qr.set_root(NULL);
+	new_node->leftchild = NULL;
+	new_node->rightchild = NULL;
+	new_node->parent = NULL;
+	new_node->balance_factor = 0;
+	return new_node;
 }
 
-tree_node *Tree::create_object(point newPoint)
+tree_node *Tree::createObject(const point &new_point)
 {
-	tree_node *newNode;
-	ConcatenableQueue lcHull(newPoint.x_coord, newPoint.y_coord);
-	ConcatenableQueue rcHull(newPoint.x_coord, newPoint.y_coord);
-	newNode = new tree_node;
-	newNode->p = newPoint;
-	newNode->label = newPoint.y_coord;
-	newNode->Ql = lcHull;
-	newNode->Qr = rcHull;
-	newNode->leftchild = NULL;
-	newNode->rightchild = NULL;
-	newNode->parent = NULL;
-	newNode->balance_factor = 0;
-	return newNode;
+	ConcatenableQueue lcHull(new_point.x_coord, new_point.y_coord);
+	ConcatenableQueue rcHull(new_point.x_coord, new_point.y_coord);
+	tree_node *new_node = new tree_node;
+	new_node->p = new_point;
+	new_node->label = new_point.y_coord;
+	new_node->Ql = lcHull;
+	new_node->Qr = rcHull;
+	new_node->leftchild = NULL;
+	new_node->rightchild = NULL;
+	new_node->parent = NULL;
+	new_node->balance_factor = 0;
+	return new_node;
 }
 
-void Tree::anticlockwiseRotation(tree_node *zNode)
+void Tree::anticlockwiseRotation(tree_node *z_node)
 {
-	tree_node *yNode;
-	yNode = zNode->rightchild;
-	zNode->rightchild = yNode->leftchild;
-	yNode->leftchild->parent = zNode;
-	yNode->leftchild = zNode;
-	if ( zNode == root_ )
+	tree_node *y_node;
+	y_node = z_node->rightchild;
+	z_node->rightchild = y_node->leftchild;
+	y_node->leftchild->parent = z_node;
+	y_node->leftchild = z_node;
+	if ( z_node == root_ )
 	{
-		yNode->parent = NULL;
-		root_ = yNode;
+		y_node->parent = NULL;
+		root_ = y_node;
 	}
-	else if ( zNode == zNode->parent->leftchild )
+	else if ( z_node == z_node->parent->leftchild )
 	{
-		zNode->parent->leftchild = yNode;
-		yNode->parent = zNode->parent;
-	}
-	else
-	{
-		yNode->parent = zNode->parent;
-		zNode->parent->rightchild = yNode;
-	}
-	zNode->parent = yNode;
-	if ( yNode->balance_factor == 1 )
-	{
-		zNode->balance_factor = 0;
-		yNode->balance_factor = 0;
+		z_node->parent->leftchild = y_node;
+		y_node->parent = z_node->parent;
 	}
 	else
 	{
-		zNode->balance_factor = 1;
-		yNode->balance_factor = -1;
+		y_node->parent = z_node->parent;
+		z_node->parent->rightchild = y_node;
 	}
-}
-
-void Tree::clockwiseRotation(tree_node *zNode)
-{
-	tree_node *yNode;
-	yNode = zNode->leftchild;
-	zNode->leftchild = yNode->rightchild;
-	yNode->rightchild->parent = zNode;
-	yNode->rightchild = zNode;
-	if ( zNode == root_ )
+	z_node->parent = y_node;
+	if ( y_node->balance_factor == 1 )
 	{
-		yNode->parent = NULL;
-		root_ = yNode;
-	}
-	else if ( zNode == zNode->parent->leftchild )
-	{
-		zNode->parent->leftchild = yNode;
-		yNode->parent = zNode->parent;
+		z_node->balance_factor = 0;
+		y_node->balance_factor = 0;
 	}
 	else
 	{
-		zNode->parent->rightchild = yNode;
-		yNode->parent = zNode->parent;
-	}
-	zNode->parent = yNode;
-	if ( yNode->balance_factor == -1 )
-	{
-		zNode->balance_factor = 0;
-		yNode->balance_factor = 0;
-	}
-	else
-	{
-		zNode->balance_factor = -1;
-		yNode->balance_factor = 1;
+		z_node->balance_factor = 1;
+		y_node->balance_factor = -1;
 	}
 }
 
-void Tree::clockwise_anticlockDoubleRotation(tree_node *zNode)
+void Tree::clockwiseRotation(tree_node *z_node)
 {
-	tree_node *yNode, *xNode;
-	yNode = zNode->rightchild;
-	xNode = yNode->leftchild;
-	zNode->rightchild = xNode->leftchild;
-	xNode->leftchild->parent = zNode;
-	yNode->leftchild = xNode->rightchild;
-	xNode->rightchild->parent = yNode;
-	xNode->rightchild = yNode;
-	yNode->parent = xNode;
-	xNode->parent = zNode->parent;
-	xNode->leftchild = zNode;
-	if ( zNode == root_ )
-		root_ = xNode;
-	else if ( zNode->parent->leftchild == zNode )
-		zNode->parent->leftchild = xNode;
-	else
-		zNode->parent->rightchild = xNode;
-	zNode->parent = xNode;
-	if ( xNode->balance_factor == 0 )
+	tree_node *y_node;
+	y_node = z_node->leftchild;
+	z_node->leftchild = y_node->rightchild;
+	y_node->rightchild->parent = z_node;
+	y_node->rightchild = z_node;
+	if ( z_node == root_ )
 	{
-		yNode->balance_factor = 0;
-		zNode->balance_factor = 0;
+		y_node->parent = NULL;
+		root_ = y_node;
 	}
-	else if ( xNode->balance_factor == 1 )
+	else if ( z_node == z_node->parent->leftchild )
 	{
-		yNode->balance_factor = 0;
-		zNode->balance_factor = -1;
+		z_node->parent->leftchild = y_node;
+		y_node->parent = z_node->parent;
 	}
 	else
 	{
-		yNode->balance_factor = 1;
-		zNode->balance_factor = 0;
+		z_node->parent->rightchild = y_node;
+		y_node->parent = z_node->parent;
 	}
-	xNode->balance_factor = 0;
+	z_node->parent = y_node;
+	if ( y_node->balance_factor == -1 )
+	{
+		z_node->balance_factor = 0;
+		y_node->balance_factor = 0;
+	}
+	else
+	{
+		z_node->balance_factor = -1;
+		y_node->balance_factor = 1;
+	}
 }
 
-void Tree::anticlockwise_clockDoubleRotation(tree_node *zNode)
+void Tree::clockwiseAnticlockDoubleRotation(tree_node *z_node)
 {
-	tree_node *yNode, *xNode;
-	yNode = zNode->leftchild;
-	xNode = yNode->rightchild;
-	zNode->leftchild = xNode->rightchild;
-	xNode->rightchild->parent = zNode;
-	yNode->rightchild = xNode->leftchild;
-	xNode->leftchild->parent = yNode;
-	xNode->leftchild = yNode;
-	yNode->parent = xNode;
-	xNode->parent = zNode->parent;
-	xNode->rightchild = zNode;
-	if ( zNode == root_ )
-		root_ = xNode;
-	else if ( zNode->parent->leftchild == zNode )
-		zNode->parent->leftchild = xNode;
+	tree_node *y_node, *x_node;
+	y_node = z_node->rightchild;
+	x_node = y_node->leftchild;
+	z_node->rightchild = x_node->leftchild;
+	x_node->leftchild->parent = z_node;
+	y_node->leftchild = x_node->rightchild;
+	x_node->rightchild->parent = y_node;
+	x_node->rightchild = y_node;
+	y_node->parent = x_node;
+	x_node->parent = z_node->parent;
+	x_node->leftchild = z_node;
+	if ( z_node == root_ )
+		root_ = x_node;
+	else if ( z_node->parent->leftchild == z_node )
+		z_node->parent->leftchild = x_node;
 	else
-		zNode->parent->rightchild = xNode;
-	zNode->parent = xNode;
-	if ( xNode->balance_factor == 0 )
+		z_node->parent->rightchild = x_node;
+	z_node->parent = x_node;
+	if ( x_node->balance_factor == 0 )
 	{
-		yNode->balance_factor = 0;
-		zNode->balance_factor = 0;
+		y_node->balance_factor = 0;
+		z_node->balance_factor = 0;
 	}
-	else if ( xNode->balance_factor == 1 )
+	else if ( x_node->balance_factor == 1 )
 	{
-		yNode->balance_factor = -1;
-		zNode->balance_factor = 0;
+		y_node->balance_factor = 0;
+		z_node->balance_factor = -1;
 	}
 	else
 	{
-		yNode->balance_factor = 0;
-		zNode->balance_factor = 1;
+		y_node->balance_factor = 1;
+		z_node->balance_factor = 0;
 	}
-	xNode->balance_factor = 0;
+	x_node->balance_factor = 0;
 }
 
-void Tree::add_node(const point &newPoint) 
+void Tree::anticlockwiseClockDoubleRotation(tree_node *z_node)
 {
-	tree_node *newNode, *parent, *current, *newLabel;
+	tree_node *y_node, *x_node;
+	y_node = z_node->leftchild;
+	x_node = y_node->rightchild;
+	z_node->leftchild = x_node->rightchild;
+	x_node->rightchild->parent = z_node;
+	y_node->rightchild = x_node->leftchild;
+	x_node->leftchild->parent = y_node;
+	x_node->leftchild = y_node;
+	y_node->parent = x_node;
+	x_node->parent = z_node->parent;
+	x_node->rightchild = z_node;
+	if ( z_node == root_ )
+		root_ = x_node;
+	else if ( z_node->parent->leftchild == z_node )
+		z_node->parent->leftchild = x_node;
+	else
+		z_node->parent->rightchild = x_node;
+	z_node->parent = x_node;
+	if ( x_node->balance_factor == 0 )
+	{
+		y_node->balance_factor = 0;
+		z_node->balance_factor = 0;
+	}
+	else if ( x_node->balance_factor == 1 )
+	{
+		y_node->balance_factor = -1;
+		z_node->balance_factor = 0;
+	}
+	else
+	{
+		y_node->balance_factor = 0;
+		z_node->balance_factor = 1;
+	}
+	x_node->balance_factor = 0;
+}
+
+void Tree::addNode(const point &new_point) 
+{
+	tree_node *new_node(NULL), *parent(NULL), *current(NULL), *new_label_node(NULL);
 	bool right;
 	int i;
-	newNode = create_object(newPoint);
+	new_node = createObject(new_point);
 	if ( root_ == NULL )
-		root_ = newNode;
+		root_ = new_node;
 	else
 	{
 		current = root_;
@@ -1124,7 +1126,7 @@ void Tree::add_node(const point &newPoint)
 				current->rightchild->Qr.print();
 				std::cout << "\n";
 			}
-			if ( newNode->label <= current->label )
+			if ( new_node->label <= current->label )
 				current = current->leftchild;
 			else 
 				current = current->rightchild;
@@ -1132,57 +1134,57 @@ void Tree::add_node(const point &newPoint)
 		}
 		if ( current == root_ )
 		{
-			if ( current->label <= newNode->label )
+			if ( current->label <= new_node->label )
 			{
-				newLabel = create_label(current->label, current, newNode);
-				newLabel->leftchild = current;
-				newLabel->rightchild = newNode;
-				newNode->parent = newLabel;
-				newLabel->leftchild->parent = newLabel;
+				new_label_node = createLabel(current->label, current, new_node);
+				new_label_node->leftchild = current;
+				new_label_node->rightchild = new_node;
+				new_node->parent = new_label_node;
+				new_label_node->leftchild->parent = new_label_node;
 			}
 			else
 			{
-				newLabel = create_label(newNode->label, newNode, current);
-				newLabel->rightchild = current;
-				newLabel->leftchild = newNode;
-				newNode->parent = newLabel;
-				newLabel->rightchild->parent = newLabel;
+				new_label_node = createLabel(new_node->label, new_node, current);
+				new_label_node->rightchild = current;
+				new_label_node->leftchild = new_node;
+				new_node->parent = new_label_node;
+				new_label_node->rightchild->parent = new_label_node;
 			}
-			root_ = newLabel;
+			root_ = new_label_node;
 		}
 		else
 		{
 			parent = current->parent;
-			if ( current->label <= newNode->label )
+			if ( current->label <= new_node->label )
 			{
-				newLabel = create_label(current->label, current, newNode);
-				newLabel->leftchild = current;
-				newLabel->rightchild = newNode;
-				newNode->parent = newLabel;
-				newLabel->leftchild->parent = newLabel;
+				new_label_node = createLabel(current->label, current, new_node);
+				new_label_node->leftchild = current;
+				new_label_node->rightchild = new_node;
+				new_node->parent = new_label_node;
+				new_label_node->leftchild->parent = new_label_node;
 			}
 			else
 			{
-				newLabel = create_label(newNode->label, newNode, current);
-				newLabel->rightchild = current;
-				newLabel->leftchild = newNode;
-				newNode->parent = newLabel;
-				newLabel->rightchild->parent = newLabel;
+				new_label_node = createLabel(new_node->label, new_node, current);
+				new_label_node->rightchild = current;
+				new_label_node->leftchild = new_node;
+				new_node->parent = new_label_node;
+				new_label_node->rightchild->parent = new_label_node;
 			}
 			if ( parent->rightchild == current )
 			{
-				parent->rightchild = newLabel;
+				parent->rightchild = new_label_node;
 				right = true;
 			}
 			else
 			{
-				parent->leftchild = newLabel;
+				parent->leftchild = new_label_node;
 				right = false;
 			}
-			current->parent = newLabel;
-			newLabel->parent = parent;
+			current->parent = new_label_node;
+			new_label_node->parent = parent;
 		}
-		updateBalanceFactor(newLabel->parent, right);
+		updateBalanceFactor(new_label_node->parent, right);
 	}
 }
 
@@ -1202,7 +1204,7 @@ void Tree::updateBalanceFactor(tree_node *current, bool right)
 				{
 					buildChildrensHulls(current->rightchild);
 					buildChildrensHulls(current->rightchild->leftchild);
-					clockwise_anticlockDoubleRotation(current);
+					clockwiseAnticlockDoubleRotation(current);
 					updateHull(current);
 					updateHull(current->parent->rightchild);
 				}
@@ -1229,7 +1231,7 @@ void Tree::updateBalanceFactor(tree_node *current, bool right)
 				{
 					buildChildrensHulls(current->leftchild);
 					buildChildrensHulls(current->leftchild->rightchild);
-					anticlockwise_clockDoubleRotation(current);
+					anticlockwiseClockDoubleRotation(current);
 					updateHull(current);
 					updateHull(current->parent->leftchild);
 				}
@@ -1265,23 +1267,22 @@ void Tree::updateBalanceFactor(tree_node *current, bool right)
 	}
 }
 
-void Tree::delete_node(const point &pointToDelete)
+void Tree::deleteNode(const point &point_to_delete)
 {
 	bool right, uLabel, update;
-	double newLabel;
-	tree_node *nodeToDelete, *parent, *brother, *aux, *aux1;
-	nodeToDelete = search_node(pointToDelete);
-	if ( nodeToDelete != NULL )
+	tree_node *node_to_delete(NULL), *parent(NULL), *brother(NULL);
+	node_to_delete = searchNode(point_to_delete);
+	if ( node_to_delete != NULL )
 	{
-		if ( nodeToDelete == root_ )
+		if ( node_to_delete == root_ )
 			// TODO: (check if root has to be deleted
 			root_ = NULL;
 		else 
 		{
-			parent = nodeToDelete->parent;
+			parent = node_to_delete->parent;
 			if ( parent == root_ )
 			{
-				if ( parent->rightchild ==  nodeToDelete )
+				if ( parent->rightchild ==  node_to_delete )
 					root_ = parent->leftchild;
 				else
 					root_ = parent->rightchild;
@@ -1289,7 +1290,7 @@ void Tree::delete_node(const point &pointToDelete)
 			}
 			else
 			{
-				if ( parent->rightchild ==  nodeToDelete )
+				if ( parent->rightchild ==  node_to_delete )
 				{
 					brother = parent->leftchild;
 					uLabel =  true;
@@ -1322,27 +1323,27 @@ void Tree::delete_node(const point &pointToDelete)
 						uLabel = false;
 				}
 				if ( brother->rightchild == NULL )
-					updateBalanceFactor_delete(parent->parent, right, uLabel, update, brother->label);
+					updateBalanceFactorDelete(parent->parent, right, uLabel, update, brother->label);
 				else
-					updateBalanceFactor_delete(parent->parent, right, uLabel, update, brother->rightchild->label);
+					updateBalanceFactorDelete(parent->parent, right, uLabel, update, brother->rightchild->label);
 			}       
-			delete nodeToDelete;
+			delete node_to_delete;
 			delete parent;
 		}
 	}
 }
 
-void Tree::updateBalanceFactor_delete(tree_node *current, bool right, bool updateLabel, bool uLabelDone, double label)
+void Tree::updateBalanceFactorDelete(tree_node *current, bool right, bool update_label, bool update_label_done, const double &label)
 {
 	bool updateBF, balanced;
 	updateBF = true;    
 	while ( current != NULL )
 	{
 		balanced = false;
-		if ( updateLabel && !uLabelDone )
+		if ( update_label && !update_label_done )
 		{
 			current->label = label;
-			uLabelDone = true;
+			update_label_done = true;
 		}
 		if ( right )
 		{
@@ -1354,7 +1355,7 @@ void Tree::updateBalanceFactor_delete(tree_node *current, bool right, bool updat
 				{
 					buildChildrensHulls(current->leftchild);
 					buildChildrensHulls(current->leftchild->rightchild);
-					anticlockwise_clockDoubleRotation(current);
+					anticlockwiseClockDoubleRotation(current);
 					updateHull(current);
 					updateHull(current->parent->leftchild);
 					balanced = true;
@@ -1389,7 +1390,7 @@ void Tree::updateBalanceFactor_delete(tree_node *current, bool right, bool updat
 				{
 					buildChildrensHulls(current->rightchild);
 					buildChildrensHulls(current->rightchild->leftchild);
-					clockwise_anticlockDoubleRotation(current);
+					clockwiseAnticlockDoubleRotation(current);
 					updateHull(current);
 					updateHull(current->parent->rightchild);
 					balanced = true;
@@ -1437,25 +1438,25 @@ void Tree::updateBalanceFactor_delete(tree_node *current, bool right, bool updat
 			if ( current->parent != NULL )
 			{
 				if ( (current->parent->rightchild == current) && (right) )
-					updateLabel = false;
+					update_label = false;
 				else if ( !right )
-					updateLabel = true;
+					update_label = true;
 				else
-					updateLabel = false;
+					update_label = false;
 			}
 			else if ( !right )
 			{
-				updateLabel = true;
+				update_label = true;
 			}
 			else
 			{
-				updateLabel = false;
+				update_label = false;
 			}
 		}
 	}
 }
 
-tree_node *Tree::search_node(const point &pointToSearch)
+tree_node *Tree::searchNode(const point &point_to_search)
 {
 	tree_node *current = root_;
 	int i(1);
@@ -1477,13 +1478,13 @@ tree_node *Tree::search_node(const point &pointToSearch)
 			current->rightchild->Qr.print();
 			std::cout << "\n";
 		}
-		if (pointToSearch.y_coord <= current->label)
+		if (point_to_search.y_coord <= current->label)
 			current = current->leftchild;
 		else
 			current = current->rightchild;
 		i++;
 	}
-	if ( (current->p.y_coord == pointToSearch.y_coord) && (current->p.x_coord == pointToSearch.x_coord) )
+	if ( (current->p.y_coord == point_to_search.y_coord) && (current->p.x_coord == point_to_search.x_coord) )
 		return current;
 	else 
 		return NULL;
@@ -1494,22 +1495,22 @@ void Tree::print()
 	printValues(root_, 0);
 }
 
-void Tree::printValues(tree_node *printNode, int indent)
+void Tree::printValues(tree_node *current_node, const int &indent)
 {
 	int i;
-	if ( printNode != NULL )
+	if ( current_node != NULL )
 	{
-		for (i=0; i<indent; i++)
+		for (i = 0; i < indent; ++i)
 			std::cout << "---";
 		//printf("-- label=%f, bf=%i //\n", printNode->label, printNode->balance_factor);
-		if ( printNode->rightchild == NULL )
-			std::cout << "-- (" << printNode->p.x_coord << ", " << printNode->p.y_coord << ")\n";
+		if ( current_node->rightchild == NULL )
+			std::cout << "-- (" << current_node->p.x_coord << ", " << current_node->p.y_coord << ")\n";
 		else
-			std::cout << "-- " << printNode->label << "\n";
+			std::cout << "-- " << current_node->label << "\n";
 		//printNode->Ql.print();
 		std::cout << "\n";
-		printValues(printNode->leftchild, indent+1);
-		printValues(printNode->rightchild, indent+1);
+		printValues(current_node->leftchild, indent + 1);
+		printValues(current_node->rightchild, indent + 1);
 	}
 }
 
