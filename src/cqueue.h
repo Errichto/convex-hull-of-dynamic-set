@@ -40,7 +40,7 @@ struct node
 	{
 	}
 
-	node_type type; // type 0 is for leaf, 1 is for 2node, 2 is for 3node
+	node_type type; 
 	double data1, data2, x_coord; // on leaf nodes, data2 is the y-coordinate of the point 
 	node *left, *middle, *right, *parent, *biggest_y, *smallest_y;//
 }; 

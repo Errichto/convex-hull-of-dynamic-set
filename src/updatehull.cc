@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	{
 		while (inFile >> p.x_coord && inFile1 >> p.y_coord)
 		{
-			tree1.add_node(p);
+			tree1.addNode(p);
 			std::cout << i << " ";
 			std::cout.flush();
 			++i;
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 						else
 							tree1.set_show(false);
 						start=clock();
-						tree1.add_node(p);
+						tree1.addNode(p);
 						end = clock();
 						time_dif = end-start;
 						std::cout << time_dif << " milliseconds spent updating the convex hull\n";
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 						else
 							tree1.set_show(false);
 						start=clock();
-						tree1.delete_node(p);
+						tree1.deleteNode(p);
 						end=clock();
 						time_dif = end-start;
 						std::cout << time_dif << " milliseconds spent updating the convex hull\n";
