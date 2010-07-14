@@ -22,12 +22,8 @@ Tree::Tree() : root_(NULL), show_(false)
 void Tree::updateHull(tree_node *current_node)
 {
 	ConcatenableQueue upperLcHull, upperRcHull, lowerLcHull, lowerRcHull, completeLcHull, completeRcHull, aux1, aux2, aux3, aux4;
-	//printf("current_node label %f \n", current_node->label);
 	updateBridgeHull(current_node, 0);
-	//printf("dd\n");
-	//printf("**********\n");
 	updateBridgeHull(current_node, 1);
-	//printf("b1.x = %f b1.y = %f b.x=%f b2.y = %f\n",current_node->bridge1_rc.x_coord,current_node->bridge1_rc.y_coord, current_node->bridge2_rc.x_coord,current_node->bridge2_rc.y_coord);
 	split_left(current_node->leftchild->Ql,&lowerLcHull, &aux1, current_node->bridge1_lc.y_coord);
 	split_left(current_node->leftchild->Qr,&lowerRcHull, &aux3, current_node->bridge1_rc.y_coord);
 	current_node->leftchild->Ql = aux1;
@@ -44,50 +40,50 @@ void Tree::updateHull(tree_node *current_node)
 
 //bridge lc hull operations
 
-void Tree::getPointsRightHalf(node *v_node, point *p, point *p0, point *p1, int &flag)
+void Tree::getPointsRightHalf(node *v_node, point &p, point &p0, point &p1, int &flag)
 {
 	if ( v_node->left->type != LEAF_NODE )
 	{
 		flag = 0;
-		p->x_coord = v_node->right->smallest_y->x_coord;
-		p->y_coord = v_node->right->smallest_y->data2;
+		p.x_coord = v_node->right->smallest_y->x_coord;
+		p.y_coord = v_node->right->smallest_y->data2;
 		if ( v_node->type == THREE_NODE )
 		{
-			p0->x_coord = v_node->middle->biggest_y->x_coord;
-			p0->y_coord = v_node->middle->biggest_y->data2;
+			p0.x_coord = v_node->middle->biggest_y->x_coord;
+			p0.y_coord = v_node->middle->biggest_y->data2;
 		}
 		else
 		{
-			p0->x_coord = v_node->left->biggest_y->x_coord;
-			p0->y_coord = v_node->left->biggest_y->data2;
+			p0.x_coord = v_node->left->biggest_y->x_coord;
+			p0.y_coord = v_node->left->biggest_y->data2;
 		}
 		if ( v_node->right->smallest_y->parent->type == THREE_NODE )
 		{
-			p1->x_coord = v_node->right->smallest_y->parent->middle->x_coord;
-			p1->y_coord = v_node->right->smallest_y->parent->middle->data2;
+			p1.x_coord = v_node->right->smallest_y->parent->middle->x_coord;
+			p1.y_coord = v_node->right->smallest_y->parent->middle->data2;
 		}
 		else
 		{
-		p1->x_coord = v_node->right->smallest_y->parent->right->x_coord;
-		p1->y_coord = v_node->right->smallest_y->parent->right->data2;
+		p1.x_coord = v_node->right->smallest_y->parent->right->x_coord;
+		p1.y_coord = v_node->right->smallest_y->parent->right->data2;
 		}
 	}
 	else
 	{
-		p0->x_coord = v_node->left->x_coord;
-		p0->y_coord = v_node->left->data2;
+		p0.x_coord = v_node->left->x_coord;
+		p0.y_coord = v_node->left->data2;
 		if ( v_node->type == THREE_NODE )
 		{
-			p->x_coord = v_node->middle->x_coord;
-			p->y_coord = v_node->middle->data2;
-			p1->x_coord = v_node->right->x_coord;
-			p1->y_coord = v_node->right->data2;
+			p.x_coord = v_node->middle->x_coord;
+			p.y_coord = v_node->middle->data2;
+			p1.x_coord = v_node->right->x_coord;
+			p1.y_coord = v_node->right->data2;
 			flag = 0;
 		}
 		else
 		{
-			p->x_coord = v_node->right->x_coord;
-			p->y_coord = v_node->right->data2;
+			p.x_coord = v_node->right->x_coord;
+			p.y_coord = v_node->right->data2;
 			if ( v_node->parent == NULL )
 				flag = 1;
 			else
@@ -96,14 +92,14 @@ void Tree::getPointsRightHalf(node *v_node, point *p, point *p0, point *p1, int 
 					flag = 1;
 				else if ( (v_node->parent->middle == v_node) || (v_node->parent->type == TWO_NODE) )
 				{
-					p1->x_coord = v_node->parent->right->smallest_y->x_coord;
-					p1->y_coord = v_node->parent->right->smallest_y->data2;
+					p1.x_coord = v_node->parent->right->smallest_y->x_coord;
+					p1.y_coord = v_node->parent->right->smallest_y->data2;
 					flag = 0;
 				}
 				else
 				{
-					p1->x_coord = v_node->parent->middle->smallest_y->x_coord;
-					p1->y_coord = v_node->parent->middle->smallest_y->data2;
+					p1.x_coord = v_node->parent->middle->smallest_y->x_coord;
+					p1.y_coord = v_node->parent->middle->smallest_y->data2;
 					flag = 0;
 				}
 			}
@@ -111,50 +107,50 @@ void Tree::getPointsRightHalf(node *v_node, point *p, point *p0, point *p1, int 
 	}
 }
 
-void Tree::getPointsLeftHalf(node *v_node, point *q, point *q0, point *q1, int &flag)
+void Tree::getPointsLeftHalf(node *v_node, point &q, point &q0, point &q1, int &flag)
 {
 	if ( v_node->left->type != LEAF_NODE )
 	{
 		flag = 0;
-		q->x_coord = v_node->left->biggest_y->x_coord;
-		q->y_coord = v_node->left->biggest_y->data2;
+		q.x_coord = v_node->left->biggest_y->x_coord;
+		q.y_coord = v_node->left->biggest_y->data2;
 		if ( v_node->type == THREE_NODE )
 		{
-			q1->x_coord = v_node->middle->smallest_y->x_coord;
-			q1->y_coord = v_node->middle->smallest_y->data2;
+			q1.x_coord = v_node->middle->smallest_y->x_coord;
+			q1.y_coord = v_node->middle->smallest_y->data2;
 		}
 		else
 		{
-			q1->x_coord = v_node->right->smallest_y->x_coord;
-			q1->y_coord = v_node->right->smallest_y->data2;
+			q1.x_coord = v_node->right->smallest_y->x_coord;
+			q1.y_coord = v_node->right->smallest_y->data2;
 		}
 		if ( v_node->left->biggest_y->parent->type == THREE_NODE )
 		{
-			q0->x_coord = v_node->left->biggest_y->parent->middle->x_coord;
-			q0->y_coord = v_node->left->biggest_y->parent->middle->data2;
+			q0.x_coord = v_node->left->biggest_y->parent->middle->x_coord;
+			q0.y_coord = v_node->left->biggest_y->parent->middle->data2;
 		}
 		else
 		{
-			q0->x_coord = v_node->left->biggest_y->parent->left->x_coord;
-			q0->y_coord = v_node->left->biggest_y->parent->left->data2;
+			q0.x_coord = v_node->left->biggest_y->parent->left->x_coord;
+			q0.y_coord = v_node->left->biggest_y->parent->left->data2;
 		}
 	}
 	else
 	{
-		q1->x_coord = v_node->right->x_coord;
-		q1->y_coord = v_node->right->data2;
+		q1.x_coord = v_node->right->x_coord;
+		q1.y_coord = v_node->right->data2;
 		if ( v_node->type == THREE_NODE )
 		{
-			q->x_coord = v_node->middle->x_coord;
-			q->y_coord = v_node->middle->data2;
-			q0->x_coord = v_node->left->x_coord;
-			q0->y_coord = v_node->left->data2;
+			q.x_coord = v_node->middle->x_coord;
+			q.y_coord = v_node->middle->data2;
+			q0.x_coord = v_node->left->x_coord;
+			q0.y_coord = v_node->left->data2;
 			flag = 0;
 		}
 		else
 		{
-			q->x_coord = v_node->left->x_coord;
-			q->y_coord = v_node->left->data2;
+			q.x_coord = v_node->left->x_coord;
+			q.y_coord = v_node->left->data2;
 			if ( v_node->parent == NULL )
 				flag = 1;
 			else
@@ -163,14 +159,14 @@ void Tree::getPointsLeftHalf(node *v_node, point *q, point *q0, point *q1, int &
 					flag = 1;
 				else if ( (v_node->parent->middle == v_node) || (v_node->parent->type == TWO_NODE) )
 				{
-					q0->x_coord = v_node->parent->left->biggest_y->x_coord;
-					q0->y_coord = v_node->parent->left->biggest_y->data2;
+					q0.x_coord = v_node->parent->left->biggest_y->x_coord;
+					q0.y_coord = v_node->parent->left->biggest_y->data2;
 					flag = 0;
 				}
 				else
 				{
-					q0->x_coord = v_node->parent->middle->biggest_y->x_coord;
-					q0->y_coord = v_node->parent->middle->biggest_y->data2;
+					q0.x_coord = v_node->parent->middle->biggest_y->x_coord;
+					q0.y_coord = v_node->parent->middle->biggest_y->data2;
 					flag = 0;
 				}
 			}
@@ -384,8 +380,7 @@ node *Tree::newSSLhLeft(node *current, point &q, point &q0, point &q1, bool &one
 	{
 		if ( current->type == THREE_NODE )
 		{
-			q1.x_coord = q.x_coord;
-			q1.y_coord = q.y_coord;
+			q1 = q;
 			onepoint = false;
 		}
 		else
@@ -398,10 +393,8 @@ node *Tree::newSSLhLeft(node *current, point &q, point &q0, point &q1, bool &one
 		return current->left;
 	else if ( q.y_coord == current->right->smallest_y->data2 )
 	{
-		q1.y_coord = q.y_coord;
-		q1.x_coord = q.x_coord;
-		q.y_coord = q0.y_coord;
-		q.x_coord = q0.x_coord;
+		q1 = q;
+		q = q0;
 		onepoint = false;
 		return current->right->smallest_y;
 	}
@@ -409,10 +402,8 @@ node *Tree::newSSLhLeft(node *current, point &q, point &q0, point &q1, bool &one
 	{
 		if ( q.y_coord == current->middle->smallest_y->data2 )
 		{
-			q1.y_coord = q.y_coord;
-			q1.x_coord = q.x_coord;
-			q.y_coord = q0.y_coord;
-			q.x_coord = q0.x_coord;
+			q1 = q;
+			q = q0;
 			onepoint = false;
 			return current->right->smallest_y;
 		}
@@ -432,8 +423,7 @@ node *Tree::newSSUhRight(node *current, point &p, point &p0, point &p1, bool &on
 			{
 				if ( current->parent->left == current )
 				{
-					p0.y_coord = p.y_coord;
-					p0.x_coord = p.x_coord;
+					p0 = p;
 					if ( current->parent->type == THREE_NODE )
 					{
 						p.y_coord = current->parent->middle->data2;
@@ -454,12 +444,13 @@ node *Tree::newSSUhRight(node *current, point &p, point &p0, point &p1, bool &on
 	{
 		if ( current->type == THREE_NODE )
 		{
-			p0.x_coord = p.x_coord;
-			p0.y_coord = p.y_coord;
+			p0 = p;
 			onepoint = false;
 		}
 		else
+		{
 			onepoint = true;
+		}
 		p.x_coord = current->right->x_coord;
 		p.y_coord = current->right->data2;
 		return current->right;
@@ -468,10 +459,8 @@ node *Tree::newSSUhRight(node *current, point &p, point &p0, point &p1, bool &on
 		return current->right;
 	else if ( p.y_coord == current->left->biggest_y->data2 )
 	{
-		p0.y_coord = p.y_coord;
-		p0.x_coord = p.x_coord;
-		p.y_coord = p1.y_coord;
-		p.x_coord = p1.x_coord;
+		p0 = p;
+		p = p1;
 		onepoint = false;
 		return current->left->biggest_y;
 	}
@@ -479,10 +468,8 @@ node *Tree::newSSUhRight(node *current, point &p, point &p0, point &p1, bool &on
 	{
 		if ( p.y_coord == current->middle->biggest_y->data2 )
 		{
-			p0.y_coord = p.y_coord;
-			p0.x_coord = p.x_coord;
-			p.y_coord = p1.y_coord;
-			p.x_coord = p1.x_coord;
+			p0 = p;
+			p = p1;
 			onepoint = false;
 			return current->middle->biggest_y;
 		}
@@ -493,7 +480,6 @@ node *Tree::newSSUhRight(node *current, point &p, point &p0, point &p1, bool &on
 
 node *Tree::newSSLhRight(node *current, point &q, point &q0, point &q1, bool &onepoint, bool &out)
 {
-	double x,y;
 	node *newcurrent = NULL;
 	if ( current->type == LEAF_NODE )
 	{
@@ -512,8 +498,7 @@ node *Tree::newSSLhRight(node *current, point &q, point &q0, point &q1, bool &on
 	}
 	else if ( current->type == THREE_NODE )
 	{
-		x = q1.x_coord;
-		y = q1.y_coord;
+		point aux = q1;
 		if ( q.y_coord == current->left->biggest_y->data2 )
 		{
 			if ( current->middle->smallest_y->parent->type == THREE_NODE )
@@ -526,10 +511,8 @@ node *Tree::newSSLhRight(node *current, point &q, point &q0, point &q1, bool &on
 				q1.x_coord = current->middle->smallest_y->parent->right->x_coord;
 				q1.y_coord = current->middle->smallest_y->parent->right->data2;
 			}
-			q0.x_coord = q.x_coord;
-			q0.y_coord = q.y_coord;
-			q.x_coord = x;
-			q.y_coord = y;
+			q0 = q;
+			q = aux;
 		}
 		else if ( q.y_coord == current->middle->smallest_y->data2 )
 		{
@@ -560,16 +543,13 @@ node *Tree::newSSLhRight(node *current, point &q, point &q0, point &q1, bool &on
 				q1.x_coord = current->right->smallest_y->parent->right->x_coord;
 				q1.y_coord = current->right->smallest_y->parent->right->data2;
 			}
-			q0.x_coord = q.x_coord;
-			q0.y_coord = q.y_coord;
-			q.x_coord = x;
-			q.y_coord = y;
+			q0 = q;
+			q = aux;
 		}
 	}
 	else
 	{
-		x = q1.x_coord;
-		y = q1.y_coord;
+		point aux = q1;
 		if ( current->right->smallest_y->parent->type == THREE_NODE )
 		{
 			q1.x_coord = current->right->smallest_y->parent->middle->x_coord;
@@ -580,17 +560,14 @@ node *Tree::newSSLhRight(node *current, point &q, point &q0, point &q1, bool &on
 			q1.x_coord = current->right->smallest_y->parent->right->x_coord;
 			q1.y_coord = current->right->smallest_y->parent->right->data2;
 		}
-		q0.x_coord = q.x_coord;
-		q0.y_coord = q.y_coord;
-		q.x_coord = x;
-		q.y_coord = y;
+		q0 = q;
+		q = aux;
 	}
 	return newcurrent;
 }
 
 node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &onepoint, bool &out)
 {
-	double x,y;
 	node *newcurrent;
 	newcurrent = NULL;
 	if ( current->type == LEAF_NODE )
@@ -608,8 +585,7 @@ node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &one
 	}
 	else if ( current->type == THREE_NODE )
 	{
-		x = p0.x_coord;
-		y = p0.y_coord;
+		point aux = p0;
 		if ( p.y_coord == current->right->smallest_y->data2 )
 		{
 			if ( current->middle->biggest_y->parent->type == THREE_NODE )
@@ -623,10 +599,8 @@ node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &one
 				p0.y_coord = current->middle->biggest_y->parent->left->data2;
 			}
 
-			p1.x_coord = p.x_coord;
-			p1.y_coord = p.y_coord;
-			p.x_coord = x;
-			p.y_coord = y;
+			p1 = p;
+			p = aux;
 		}
 		else if ( p.y_coord == current->middle->biggest_y->data2 )
 		{
@@ -657,16 +631,13 @@ node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &one
 				p0.x_coord = current->left->biggest_y->parent->left->x_coord;
 				p0.y_coord = current->left->biggest_y->parent->left->data2;
 			}
-			p1.x_coord = p.x_coord;
-			p1.y_coord = p.y_coord;
-			p.x_coord = x;
-			p.y_coord = y;
+			p1 = p;
+			p = aux;
 		}
 	}
 	else
 	{
-		x = p0.x_coord;
-		y = p0.y_coord;
+		point aux = p0;
 		if ( current->left->smallest_y->parent->type == THREE_NODE )
 		{
 			p0.x_coord = current->left->biggest_y->parent->middle->x_coord;
@@ -677,15 +648,12 @@ node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &one
 			p0.x_coord = current->left->smallest_y->parent->left->x_coord;
 			p0.y_coord = current->left->smallest_y->parent->left->data2;
 		}
-		p1.x_coord = p.x_coord;
-		p1.y_coord = p.y_coord;
-		p.x_coord = x;
-		p.y_coord = y;
+		p1 = p;
+		p = aux;
 	}
 	return newcurrent;
 }
 
-//
 
 void Tree::buildChildrensHulls(tree_node *parent_node)
 {
@@ -796,7 +764,7 @@ void Tree::updateBridgeHull(tree_node *v_node, const int &hull)
 		{
 			if ( current_uh->type == LEAF_NODE )
 			{
-				getPointsLeftHalf(current_lh, &q, &q0, &q1, flag_lh);
+				getPointsLeftHalf(current_lh, q, q0, q1, flag_lh);
 				if ( onepoint_uh )
 					flag_uh = 2;
 				else
@@ -804,7 +772,7 @@ void Tree::updateBridgeHull(tree_node *v_node, const int &hull)
 			}
 			else if ( current_lh->type == LEAF_NODE )
 			{
-				getPointsRightHalf(current_uh, &p, &p0, &p1, flag_uh);
+				getPointsRightHalf(current_uh, p, p0, p1, flag_uh);
 				if ( onepoint_lh )
 					flag_lh = 2;
 				else
@@ -812,8 +780,8 @@ void Tree::updateBridgeHull(tree_node *v_node, const int &hull)
 			}   
 			else
 			{
-				getPointsLeftHalf(current_lh, &q, &q0, &q1, flag_lh);
-				getPointsRightHalf(current_uh, &p, &p0, &p1, flag_uh);
+				getPointsLeftHalf(current_lh, q, q0, q1, flag_lh);
+				getPointsRightHalf(current_uh, p, p0, p1, flag_uh);
 			}
 			out = false;
 			while (!out)
@@ -1373,7 +1341,6 @@ void Tree::updateBalanceFactorDelete(tree_node *current, bool right, bool update
 					clockwiseRotation(current);
 					updateHull(current);
 				}
-				//balanced = true;
 				current = current->parent;
 				updateHull(current);
 			}
@@ -1484,7 +1451,7 @@ tree_node *Tree::searchNode(const point &point_to_search)
 			current = current->rightchild;
 		i++;
 	}
-	if ( (current->p.y_coord == point_to_search.y_coord) && (current->p.x_coord == point_to_search.x_coord) )
+	if ( current->p == point_to_search)
 		return current;
 	else 
 		return NULL;
@@ -1502,12 +1469,10 @@ void Tree::printValues(tree_node *current_node, const int &indent)
 	{
 		for (i = 0; i < indent; ++i)
 			std::cout << "---";
-		//printf("-- label=%f, bf=%i //\n", printNode->label, printNode->balance_factor);
 		if ( current_node->rightchild == NULL )
 			std::cout << "-- (" << current_node->p.x_coord << ", " << current_node->p.y_coord << ")\n";
 		else
 			std::cout << "-- " << current_node->label << "\n";
-		//printNode->Ql.print();
 		std::cout << "\n";
 		printValues(current_node->leftchild, indent + 1);
 		printValues(current_node->rightchild, indent + 1);

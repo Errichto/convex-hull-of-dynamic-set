@@ -25,6 +25,28 @@ struct point
 	point() : x_coord(0.0), y_coord(0.0)
 	{
 	}
+	point(const double &x, const double &y) : x_coord(x), y_coord(y)
+	{
+	}
+	point(const point &other) : x_coord(other.x_coord), y_coord(other.y_coord)
+	{
+	}
+
+	bool operator == (const point &rhs) const
+	{
+		return (x_coord == rhs.x_coord && y_coord == rhs.y_coord);
+	}
+	bool operator != (const point &rhs) const
+	{
+		return !(*this == rhs);
+	}
+  point& operator = (const point &rhs)
+	{
+		this->x_coord = rhs.x_coord;
+		this->y_coord = rhs.y_coord;
+		return *this;
+	}
+
 	double x_coord, y_coord;
 };
 
@@ -66,8 +88,8 @@ private:
 	void updateBridgeHull(tree_node *v_node, const int &hull);
 	void updateHull(tree_node *current_node);
 	void buildChildrensHulls(tree_node *parent_node);
-	void getPointsRightHalf(node *v_node, point *p, point *p0, point *p1, int &flag); 
-	void getPointsLeftHalf(node *v_node, point *p, point *p0, point *p1, int &flag);
+	void getPointsRightHalf(node *v_node, point &p, point &p0, point &p1, int &flag); 
+	void getPointsLeftHalf(node *v_node, point &q, point &q0, point &q1, int &flag);
 	int rightTurn(const point &p0, const point &p1, const point &p2) const;
 	double case9(const point &p, const point &p0, const point &p1,
 					const point &q, const point &q0, const point &q1) const ;
