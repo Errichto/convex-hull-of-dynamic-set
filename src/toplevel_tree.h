@@ -92,7 +92,7 @@ private:
 	void getPointsLeftHalf(node *v_node, point &q, point &q0, point &q1, int &flag);
 	int rightTurn(const point &p0, const point &p1, const point &p2) const;
 	double case9(const point &p, const point &p0, const point &p1,
-					const point &q, const point &q0, const point &q1) const ;
+					const point &q, const point &q0, const point &q1, const int &flag_lh, const int &flag_uh) const ;
 	int bridgeCasesLcHull(const point &p, const point &p0, const point &p1,
 					const point &q, const point &q0, const point &q1,
 					const double &half, const int &flag_lh, const int &flag_uh) const;

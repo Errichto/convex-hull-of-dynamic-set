@@ -61,6 +61,16 @@ public:
 	node *leftmostNodeAtLevel(const int &level, node*);	
 	node *root();
 	void set_root(node *new_root);
+	ConcatenableQueue clone();
+
+	//Procedures concatenate and split concatenable queues
+	static ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2);
+	//split_left, CQ1 keeps the node with value val 
+	static void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value);
+
+	//split_right, CQ2 keeps the node with value val 
+	static void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value);
+
 private:
 	node *createLeafNode(const double &x_coord, const double &y_coord);
 	node *create2Node(const double &l_value, const double &m_value, node *left_child, node *right_child);
@@ -69,17 +79,10 @@ private:
 	void deleteNode(node *node_to_delete);
 	void updateValuesInsert(node *current_node, double value);
 	void updateValuesDelete(node *current_node, const double &current_value, const double &new_value);
-	void printValues(node *current_node, const int &indent);
+	void printValues(node *current_node);
+	void addQueuePointsToQueue(ConcatenableQueue *CQ, node *current_node);
+
 	node *root_;
 };
-
-//Procedures concatenate and split concatenable queues
-ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2);
-
-//split_left, CQ1 keeps the node with value val 
-void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value);
-
-//split_right, CQ2 keeps the node with value val 
-void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value);
 
 #endif /*__CQUEUE_H__*/
