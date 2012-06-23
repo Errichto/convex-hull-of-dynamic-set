@@ -24,16 +24,16 @@ void Tree::updateHull(tree_node *current_node)
 	ConcatenableQueue upperLcHull, upperRcHull, lowerLcHull, lowerRcHull, completeLcHull, completeRcHull, aux1, aux2, aux3, aux4;
 	updateBridgeHull(current_node, 0);
 	updateBridgeHull(current_node, 1);
-	split_left(current_node->leftchild->Ql,&lowerLcHull, &aux1, current_node->bridge1_lc.y_coord);
-	split_left(current_node->leftchild->Qr,&lowerRcHull, &aux3, current_node->bridge1_rc.y_coord);
+	ConcatenableQueue::split_left(current_node->leftchild->Ql.clone(),&lowerLcHull, &aux1, current_node->bridge1_lc.y_coord);
+	ConcatenableQueue::split_left(current_node->leftchild->Qr.clone(),&lowerRcHull, &aux3, current_node->bridge1_rc.y_coord);
 	current_node->leftchild->Ql = aux1;
 	current_node->leftchild->Qr = aux3;
-	split_right(current_node->rightchild->Ql, &aux2, &upperLcHull, current_node->bridge2_lc.y_coord);
-	split_right(current_node->rightchild->Qr, &aux4, &upperRcHull, current_node->bridge2_rc.y_coord);
+	ConcatenableQueue::split_right(current_node->rightchild->Ql.clone(), &aux2, &upperLcHull, current_node->bridge2_lc.y_coord);
+	ConcatenableQueue::split_right(current_node->rightchild->Qr.clone(), &aux4, &upperRcHull, current_node->bridge2_rc.y_coord);
 	current_node->rightchild->Ql = aux2;
 	current_node->rightchild->Qr = aux4;
-	completeLcHull = concatenate(lowerLcHull,upperLcHull);
-	completeRcHull = concatenate(lowerRcHull,upperRcHull);
+	completeLcHull = ConcatenableQueue::concatenate(lowerLcHull,upperLcHull);
+	completeRcHull = ConcatenableQueue::concatenate(lowerRcHull,upperRcHull);
 	current_node->Ql = completeLcHull;   
 	current_node->Qr = completeRcHull;
 }
@@ -174,10 +174,10 @@ void Tree::getPointsLeftHalf(node *v_node, point &q, point &q0, point &q1, int &
 	}
 }
 
-int Tree::rightTurn(const point &p0, const point &p1, const point &p2) const
+int Tree::rightTurn(const point &p1, const point &p2, const point &p3) const
 {
 	double cross_prod;
-	cross_prod = ((p2.x_coord - p0.x_coord)*(p1.y_coord - p0.y_coord))-((p2.y_coord - p0.y_coord)*(p1.x_coord - p0.x_coord));
+	cross_prod = ((p3.x_coord - p1.x_coord)*(p2.y_coord - p1.y_coord))-((p3.y_coord - p1.y_coord)*(p2.x_coord - p1.x_coord));
 	if ( cross_prod == 0 )
 		return 2; //no turn (colinear points)
 	else if ( cross_prod < 0 )
@@ -187,10 +187,15 @@ int Tree::rightTurn(const point &p0, const point &p1, const point &p2) const
 }
 
 double Tree::case9(const point &p, const point &p0, const point &p1,
-				const point &q, const point &q0, const point &q1) const
+				const point &q, const point &q0, const point &q1, const int &flag_lh, const int &flag_uh) const
 {
 	double m1, m2, mp, mq, bp, bq;
-	m2 = (p.y_coord-p1.y_coord)/(p.x_coord-p1.x_coord);
+
+	if (flag_uh == 1)
+		m2 = 0;
+	else
+		m2 = (p.y_coord-p1.y_coord)/(p.x_coord-p1.x_coord);
+
 	if ( p0.x_coord != p.x_coord )
 	{
 		m1 = (p0.y_coord-p.y_coord)/(p0.x_coord-p.x_coord);
@@ -200,11 +205,18 @@ double Tree::case9(const point &p, const point &p0, const point &p1,
 			mp = m1 + ((m2-m1)/2);
 	}
 	else
+	{
 		if ( m2 > 0 )
 			mp = m2 + 0.05;
 		else
 			mp = m2 - 0.05;
-	m1 = (q0.y_coord-q.y_coord)/(q0.x_coord-q.x_coord);
+	}
+
+	if (flag_lh == 1)
+		m1 = 0;
+	else
+		m1 = (q0.y_coord-q.y_coord)/(q0.x_coord-q.x_coord);
+
 	if ( q.x_coord != q1.x_coord )
 	{
 		m2 = (q.y_coord-q1.y_coord)/(q.x_coord-q1.x_coord);
@@ -214,12 +226,15 @@ double Tree::case9(const point &p, const point &p0, const point &p1,
 			mq = m1 + ((m2-m1)/2);
 	}
 	else
+	{
 		if ( m2 < 0 )
 			mq = m1 - 0.05;
 		else
 			mq = m1 + 0.05;
+	}
 	bp = p.y_coord - (mp*p.x_coord);
 	bq = q.y_coord - (mq*q.x_coord);
+
 	return ((mq*bp)-(mp*bq))/(mq-mp);
 }
 
@@ -277,7 +292,7 @@ int Tree::bridgeCasesLcHull(const point &p, const point &p0, const point &p1,
 		return 8;
 	else if ( (chck_p1 == 1) && (chck_p0 == 0) && (chck_q1 == 1) && (chck_q0 == 0) )
 	{
-		intersec = case9(p,p0,p1,q,q0,q1);
+		intersec = case9(p,p0,p1,q,q0,q1,flag_lh,flag_uh);
 		if (intersec < half)
 			return 9;
 		else 
@@ -339,7 +354,7 @@ int Tree::bridgeCasesRcHull(const point &p, const point &p0, const point &p1,
 		return 8;
 	else if ( (chck_p1 == 0) && (chck_p0 == 1) && (chck_q1 == 0) && (chck_q0 == 1) )
 	{
-		intersec = case9(p,p0,p1,q,q0,q1);
+		intersec = case9(p,p0,p1,q,q0,q1,flag_lh,flag_uh);
 		if (intersec < half)
 			return 9;
 		else 
@@ -658,12 +673,12 @@ node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &one
 void Tree::buildChildrensHulls(tree_node *parent_node)
 {
 	ConcatenableQueue upperLcHull, upperRcHull, lowerLcHull, lowerRcHull, completeUpperLcHull, completeUpperRcHull, completeLowerLcHull, completeLowerRcHull;
-	split_right(parent_node->Ql,&lowerLcHull, &upperLcHull, parent_node->bridge2_lc.y_coord);
-	split_right(parent_node->Qr,&lowerRcHull, &upperRcHull, parent_node->bridge2_rc.y_coord);
-	completeUpperLcHull = concatenate(parent_node->rightchild->Ql,upperLcHull);
-	completeUpperRcHull = concatenate(parent_node->rightchild->Qr,upperRcHull);
-	completeLowerLcHull = concatenate(lowerLcHull, parent_node->leftchild->Ql);
-	completeLowerRcHull = concatenate(lowerRcHull, parent_node->leftchild->Qr);
+	ConcatenableQueue::split_right(parent_node->Ql.clone(),&lowerLcHull, &upperLcHull, parent_node->bridge2_lc.y_coord);
+	ConcatenableQueue::split_right(parent_node->Qr.clone(),&lowerRcHull, &upperRcHull, parent_node->bridge2_rc.y_coord);
+	completeUpperLcHull = ConcatenableQueue::concatenate(parent_node->rightchild->Ql,upperLcHull);
+	completeUpperRcHull = ConcatenableQueue::concatenate(parent_node->rightchild->Qr,upperRcHull);
+	completeLowerLcHull = ConcatenableQueue::concatenate(lowerLcHull, parent_node->leftchild->Ql);
+	completeLowerRcHull = ConcatenableQueue::concatenate(lowerRcHull, parent_node->leftchild->Qr);
 	parent_node->rightchild->Ql = completeUpperLcHull;
 	parent_node->leftchild->Ql = completeLowerLcHull; 
 	parent_node->rightchild->Qr = completeUpperRcHull;
@@ -674,7 +689,7 @@ void Tree::updateBridgeHull(tree_node *v_node, const int &hull)
 {
 	bool bridgefound, onepoint_lh, onepoint_uh, out;
 	double half;
-	int chk_case, flag_lh, flag_uh;
+	int chk_case, flag_lh = 0, flag_uh = 0;
 	point p, p0, p1, q, q0, q1;
 	node *current_lh, *current_uh, *aux;
 	bridgefound = false;
@@ -885,8 +900,8 @@ tree_node *Tree::createLabel(const double &new_label, tree_node *left_child, tre
 {
 	tree_node *new_node = new tree_node;
 	new_node->label = new_label;
-	new_node->Ql = concatenate(left_child->Ql, right_child->Ql);
-	new_node->Qr = concatenate(left_child->Qr, right_child->Qr);
+	new_node->Ql = ConcatenableQueue::concatenate(left_child->Ql, right_child->Ql);
+	new_node->Qr = ConcatenableQueue::concatenate(left_child->Qr, right_child->Qr);
 	new_node->bridge1_lc = left_child->p;
 	new_node->bridge2_lc = right_child->p;
 	new_node->bridge1_rc = left_child->p;

@@ -22,6 +22,37 @@ ConcatenableQueue::ConcatenableQueue(const double &x_coord, const double &y_coor
 	addNode(x_coord, y_coord);
 }
 
+ConcatenableQueue ConcatenableQueue::clone()
+{
+	ConcatenableQueue newQueue;
+	if (!isEmpty())
+	{
+		addQueuePointsToQueue(&newQueue, root_);
+	}
+	return newQueue;
+}
+
+void ConcatenableQueue::addQueuePointsToQueue(ConcatenableQueue *CQ, node *current_node)
+{
+	if (current_node != NULL)
+	{
+		if (current_node->type == LEAF_NODE)
+			CQ->addNode(current_node->x_coord, current_node->data2);
+ 
+		addQueuePointsToQueue(CQ, current_node->left);
+		addQueuePointsToQueue(CQ, current_node->middle);
+		addQueuePointsToQueue(CQ, current_node->right);
+	}
+	/*if (current_node->type == LEAF_NODE)
+		return createLeafNode(current_node->x_coord, current_node->data2);
+		else if (current_node->type == TWO_NODE)
+			return create2Node(current_node->data1, current_node->data2, cloneNode(current_node->left), cloneNode(current_node->right));
+ 
+	node *new_node = create2Node(current_node->data1, current_node->data2, cloneNode(current_node->left), cloneNode(current_node->right));
+	new_node->middle = cloneNode(current_node->middle);
+	return new_node;*/
+}
+
 node *ConcatenableQueue::rightmostNodeAtLevel(const int &level, node *bigger_y)
 {
 	node *currentNode;
@@ -433,6 +464,9 @@ void ConcatenableQueue::addNode(const double &x_coord, const double &y_coord)
 			else
 				newNode = create2Node(root_->data2, y_coord, newNode2, newNode1);
 
+			delete root_;
+			root_ = NULL;
+
 			root_ = newNode;
 			newNode1->parent = root_;
 			newNode2->parent = root_;
@@ -511,18 +545,18 @@ void ConcatenableQueue::print()
 	if ( isEmpty() )
 		std::cout << "Empty Queue\n";
 	else
-		printValues(root_, 0);
+		printValues(root_);
 }
 
-void ConcatenableQueue::printValues(node *current_node, const int &indent)
+void ConcatenableQueue::printValues(node *current_node)
 {
 	if ( current_node != NULL )
 	{
 		if ( current_node->type == LEAF_NODE)
 			std::cout << "(" << current_node->x_coord << ", " << current_node->data2 << "), ";
-		printValues(current_node->left, indent + 1);	
-		printValues(current_node->middle, indent + 1);
-		printValues(current_node->right, indent + 1);
+		printValues(current_node->left);	
+		printValues(current_node->middle);
+		printValues(current_node->right);
 	}
 }
 	
@@ -547,7 +581,7 @@ void ConcatenableQueue::set_root(node *new_root)
 }
 
 //Procedures concatenate and split concatenable queues
-ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2)
+ConcatenableQueue ConcatenableQueue::concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2)
 {
 	ConcatenableQueue newCQ;
 	int heightCQ1, heightCQ2, level;
@@ -671,7 +705,7 @@ ConcatenableQueue concatenate(ConcatenableQueue CQ1, ConcatenableQueue CQ2)
 }
 
 //split_left, CQ1 keeps the node with value val 
-void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value)
+void ConcatenableQueue::split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value)
 {
 	ConcatenableQueue cqr1, cqr2, cqr, cql1, cql2, cql, aux1, aux2;
 	node *currentNode;
@@ -774,7 +808,7 @@ void split_left (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue
 }
 
 //split_right, CQ2 keeps the node with value val 
-void split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value)
+void ConcatenableQueue::split_right (ConcatenableQueue CQ, ConcatenableQueue *CQ1, ConcatenableQueue *CQ2, const double &split_value)
 {
 	ConcatenableQueue cqr1, cqr2, cqr, cql1, cql2, cql, aux1, aux2;
 	node *currentNode = CQ.root();
