@@ -672,7 +672,7 @@ ConcatenableQueue ConcatenableQueue::concatenate(ConcatenableQueue CQ1, Concaten
 				attachNode->type = THREE_NODE;
 				attachNode->middle = attachNode->left;
 				attachNode->left = CQ1.root();
-				attachNode->left->parent = newCQ.root();
+				attachNode->left->parent = attachNode;
 				if ( CQ1.root()->type == LEAF_NODE )
 				{
 					attachNode->data1 = attachNode->left->data2;
