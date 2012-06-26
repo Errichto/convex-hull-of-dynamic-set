@@ -282,7 +282,7 @@ int Tree::bridgeCasesLcHull(const point &p, const point &p0, const point &p1,
 		return 3;
 	else if ( (chck_p1 == 0) && (chck_p0 == 1) && (chck_q1 == 0) && ((chck_q0 == 0) || (chck_q0 == 2)) )
 		return 4;
-	else if ( ((chck_p1 == 1) || (chck_p1 == 2)) && ((chck_p0 == 0) || (chck_p0 == 2)) && (chck_q1 == 0 || chck_q1 == 2) && ((chck_q0 == 0) || (chck_q0 == 2)) )
+	else if ( ((chck_p1 == 1) || (chck_p1 == 2)) && ((chck_p0 == 0) || (chck_p0 == 2)) && (chck_q1 == 0) && ((chck_q0 == 0) || (chck_q0 == 2)) )
 		return 5;
 	else if ( (chck_p1 == 0) && (chck_p0 == 1) && (chck_q1 == 0 || chck_q1 == 2) && (chck_q0 == 1) )
 		return 6;
@@ -347,7 +347,7 @@ int Tree::bridgeCasesRcHull(const point &p, const point &p0, const point &p1,
 		return 3;
 	else if ( (chck_p1 == 1) && (chck_p0 == 0) && (chck_q1 == 1) && ((chck_q0 == 1) || (chck_q0 == 2)) )
 		return 4;
-	else if ( ((chck_p1 == 0) || (chck_p1 == 2)) && ((chck_p0 == 1) || (chck_p0 == 2)) && (chck_q1 == 1 || chck_q1 == 2) && ((chck_q0 == 1) || (chck_q0 == 2)) )
+	else if ( ((chck_p1 == 0) || (chck_p1 == 2)) && ((chck_p0 == 1) || (chck_p0 == 2)) && (chck_q1 == 1) && ((chck_q0 == 1) || (chck_q0 == 2)) )
 		return 5;
 	else if ( (chck_p1 == 1) && (chck_p0 == 0) && (chck_q1 == 1 || chck_q1 == 2) && (chck_q0 == 0) )
 		return 6;
@@ -661,8 +661,8 @@ node *Tree::newSSUhLeft(node *current, point &p, point &p0, point &p1, bool &one
 		point aux = p0;
 		if ( current->left->smallest_y->parent->type == THREE_NODE )
 		{
-			p0.x_coord = current->left->biggest_y->parent->middle->x_coord;
-			p0.y_coord = current->left->biggest_y->parent->middle->data2;
+			p0.x_coord = current->left->smallest_y->parent->middle->x_coord;
+			p0.y_coord = current->left->smallest_y->parent->middle->data2;
 		}
 		else
 		{
@@ -1088,7 +1088,7 @@ void Tree::anticlockwiseClockDoubleRotation(tree_node *z_node)
 void Tree::addNode(const point &new_point) 
 {
 	tree_node *new_node(NULL), *parent(NULL), *current(NULL), *new_label_node(NULL);
-	bool right;
+	bool right = false;
 	int i;
 	new_node = createObject(new_point);
 	if ( root_ == NULL )
