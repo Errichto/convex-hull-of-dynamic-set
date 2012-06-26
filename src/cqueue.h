@@ -35,6 +35,7 @@ struct node
 					left(NULL),
 					middle(NULL),
 					right(NULL),
+					parent(NULL),
 					biggest_y(NULL),
 					smallest_y(NULL)
 	{

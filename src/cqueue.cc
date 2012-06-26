@@ -442,22 +442,16 @@ node *ConcatenableQueue::create2Node(const double &l_value, const double &m_valu
 void ConcatenableQueue::addNode(const double &x_coord, const double &y_coord) 
 {
 	node *newNode, *aux;
-	newNode = new node;
 	if ( root_ == NULL)
 	{
-		newNode = createLeafNode(x_coord, y_coord);
-		root_ = newNode;
+		root_ = createLeafNode(x_coord, y_coord);
 	}
 	else
 	{
 		if ( root_->type == LEAF_NODE )
 		{
-			node *newNode1;
-			node *newNode2;
-			newNode1 = new node;
-			newNode2 = new node;
-			newNode1 = createLeafNode(x_coord, y_coord);
-			newNode2 = createLeafNode(root_->x_coord,root_->data2);
+			node *newNode1 = createLeafNode(x_coord, y_coord);
+			node *newNode2 = createLeafNode(root_->x_coord,root_->data2);
 
 			if ( y_coord < root_->data2 )
 				newNode = create2Node(y_coord, root_->data2, newNode1, newNode2);
@@ -473,10 +467,8 @@ void ConcatenableQueue::addNode(const double &x_coord, const double &y_coord)
 		}
 		else
 		{
-			node *father;
-			father = new node;
 			newNode = createLeafNode(x_coord, y_coord);
-			father = searchForInsert(newNode, root_);
+			node *father = searchForInsert(newNode, root_);
 			if ( father->type == TWO_NODE )
 			{
 				newNode->parent = father;
