@@ -282,9 +282,9 @@ int Tree::bridgeCasesLcHull(const point &p, const point &p0, const point &p1,
 		return 3;
 	else if ( (chck_p1 == 0) && (chck_p0 == 1) && (chck_q1 == 0) && ((chck_q0 == 0) || (chck_q0 == 2)) )
 		return 4;
-	else if ( ((chck_p1 == 1) || (chck_p1 == 2)) && ((chck_p0 == 0) || (chck_p0 == 2)) && (chck_q1 == 0) && ((chck_q0 == 0) || (chck_q0 == 2)) )
+	else if ( ((chck_p1 == 1) || (chck_p1 == 2)) && ((chck_p0 == 0) || (chck_p0 == 2)) && (chck_q1 == 0 || chck_q1 == 2) && ((chck_q0 == 0) || (chck_q0 == 2)) )
 		return 5;
-	else if ( (chck_p1 == 0) && (chck_p0 == 1) && (chck_q1 == 0) && (chck_q0 == 1) )
+	else if ( (chck_p1 == 0) && (chck_p0 == 1) && (chck_q1 == 0 || chck_q1 == 2) && (chck_q0 == 1) )
 		return 6;
 	else if ( (chck_p1 == 1) && (chck_p0 == 0) && (chck_q1 == 0) && (chck_q0 == 1) )
 		return 7;
@@ -298,6 +298,9 @@ int Tree::bridgeCasesLcHull(const point &p, const point &p0, const point &p1,
 		else 
 			return 10;
 	}
+	std::cout << "ERROR in LcHull bridge case: chck_p0=" << chck_p0 << " ; chck_p1=" << chck_p1 << " ; chck_q1=" << chck_q1 << " ; chck_q0=" << chck_q0 << std::endl;
+	std::cout << "p0=(" << p0.x_coord << "," << p0.y_coord << "); p=(" << p.x_coord << "," << p.y_coord << "); p1=(" << p1.x_coord << "," << p1.y_coord << ")\n";
+	std::cout << "q0=(" << q0.x_coord << "," << q0.y_coord << "); q=(" << q.x_coord << "," << q.y_coord << "); q1=(" << q1.x_coord << "," << q1.y_coord << ")\n";
 }
 
 int Tree::bridgeCasesRcHull(const point &p, const point &p0, const point &p1,
@@ -344,9 +347,9 @@ int Tree::bridgeCasesRcHull(const point &p, const point &p0, const point &p1,
 		return 3;
 	else if ( (chck_p1 == 1) && (chck_p0 == 0) && (chck_q1 == 1) && ((chck_q0 == 1) || (chck_q0 == 2)) )
 		return 4;
-	else if ( ((chck_p1 == 0) || (chck_p1 == 2)) && ((chck_p0 == 1) || (chck_p0 == 2)) && (chck_q1 == 1) && ((chck_q0 == 1) || (chck_q0 == 2)) )
+	else if ( ((chck_p1 == 0) || (chck_p1 == 2)) && ((chck_p0 == 1) || (chck_p0 == 2)) && (chck_q1 == 1 || chck_q1 == 2) && ((chck_q0 == 1) || (chck_q0 == 2)) )
 		return 5;
-	else if ( (chck_p1 == 1) && (chck_p0 == 0) && (chck_q1 == 1) && (chck_q0 == 0) )
+	else if ( (chck_p1 == 1) && (chck_p0 == 0) && (chck_q1 == 1 || chck_q1 == 2) && (chck_q0 == 0) )
 		return 6;
 	else if ( (chck_p1 == 0) && (chck_p0 == 1) && (chck_q1 == 1) && (chck_q0 == 0) )
 		return 7;
@@ -360,6 +363,9 @@ int Tree::bridgeCasesRcHull(const point &p, const point &p0, const point &p1,
 		else 
 			return 10;
 	}
+	std::cout << "ERROR in RcHull bridge case: chck_p0=" << chck_p0 << " ; chck_p1=" << chck_p1 << " ; chck_q1=" << chck_q1 << " ; chck_q0=" << chck_q0 << std::endl;
+	std::cout << "p0=(" << p0.x_coord << "," << p0.y_coord << "); p=(" << p.x_coord << "," << p.y_coord << "); p1=(" << p1.x_coord << "," << p1.y_coord << ")\n";
+	std::cout << "q0=(" << q0.x_coord << "," << q0.y_coord << "); q=(" << q.x_coord << "," << q.y_coord << "); q1=(" << q1.x_coord << "," << q1.y_coord << ")\n";
 }
 
 node *Tree::newSSLhLeft(node *current, point &q, point &q0, point &q1, bool &onepoint)
@@ -1093,6 +1099,7 @@ void Tree::addNode(const point &new_point)
 		i = 1;
 		while ( current->leftchild !=NULL )
 		{
+
 			buildChildrensHulls(current);
 			if (show_)
 			{
